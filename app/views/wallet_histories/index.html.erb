@@ -1,0 +1,26 @@
+<p id="notice"><%= notice %></p>
+<h1>Wallet Histories</h1>
+<table class="table">
+  <thead>
+    <tr>
+      <th>created_at</th>
+      <th>Currency type</th>
+      <th>Money</th>
+      <th colspan="3"></th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @wallet_histories.each do |wallet_history| %>
+      <tr>
+        <td><%= wallet_history.created_at %></td>
+        <td><%= wallet_history.currency_type %></td>
+        <td><%= wallet_history.money %></td>
+        <td><%= link_to 'Show', wallet_history %></td>
+        <td><%= link_to 'Edit', edit_wallet_history_path(wallet_history) %></td>
+        <td><%= link_to 'Destroy', wallet_history, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+<br>
+<%= link_to 'New Wallet History', new_wallet_history_path %>

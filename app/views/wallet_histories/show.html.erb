@@ -1,0 +1,14 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <strong>Currency type:</strong>
+  <%= @wallet_history.currency_type %>
+</p>
+
+<p>
+  <strong>Money:</strong>
+  <%= @wallet_history.money %>
+</p>
+
+<%= link_to 'Edit', edit_wallet_history_path(@wallet_history) %> |
+<%= link_to 'Back', wallet_histories_path %>

@@ -1,0 +1,55 @@
+<%= form_with(model: active_order, local: true) do |form| %>
+	<% if active_order.errors.any? %>
+		<div id="error_explanation">
+			<h2><%= pluralize(active_order.errors.count, "error") %> prohibited this active_order from being saved:</h2>
+			<ul>
+				<% active_order.errors.full_messages.each do |message| %>
+					<li><%= message %></li>
+				<% end %>
+			</ul>
+		</div>
+	<% end %>
+	<div class="field">
+		<%= form.label :order_id %>
+		<%= form.number_field :order_id, id: :active_order_order_id %>
+	</div>
+	<div class="field">
+		<%= form.label :currency_pair %>
+		<%= form.text_field :currency_pair, id: :active_order_currency_pair %>
+	</div>
+	<div class="field">
+		<%= form.label :action %>
+		<%= form.text_field :action, id: :active_order_action %>
+	</div>
+	<div class="field">
+		<%= form.label :amount %>
+		<%= form.text_field :amount, id: :active_order_amount %>
+	</div>
+	<div class="field">
+		<%= form.label :price %>
+		<%= form.text_field :price, id: :active_order_price %>
+	</div>
+	<div class="field">
+		<%= form.label :timestamp %>
+		<%= form.text_field :timestamp, id: :active_order_timestamp %>
+	</div>
+	<div class="field">
+		<%= form.label :transaction_id %>
+		<%= form.text_field :transaction_id, id: :active_order_transaction_id %>
+	</div>
+	<div class="field">
+		<%= form.label :limit %>
+		<%= form.text_field :limit, id: :active_order_limit %>
+	</div>
+	<div class="field">
+		<%= form.label :contract_price %>
+		<%= form.text_field :contract_price, id: :active_order_contract_price %>
+	</div>
+	<div class="field">
+		<%= form.label :lower_limit %>
+		<%= form.text_field :lower_limit %>
+	</div>
+	<div class="actions">
+		<%= form.submit %>
+	</div>
+<% end %>

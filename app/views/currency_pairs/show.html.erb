@@ -1,0 +1,29 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <strong>Currency pair:</strong>
+  <%= @currency_pair.currency_pair %>
+</p>
+
+<p>
+  <strong>Unit min:</strong>
+  <%= @currency_pair.unit_min %>
+</p>
+
+<p>
+  <strong>Unit step:</strong>
+  <%= @currency_pair.unit_step %>
+</p>
+
+<p>
+  <strong>Unit digest:</strong>
+  <%= @currency_pair.unit_digest %>
+</p>
+
+<p>
+  <strong>Currency digest:</strong>
+  <%= @currency_pair.currency_digest %>
+</p>
+
+<%= link_to 'Edit', edit_currency_pair_path(@currency_pair) %> |
+<%= link_to 'Back', currency_pairs_path %>

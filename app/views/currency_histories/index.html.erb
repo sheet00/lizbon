@@ -1,0 +1,30 @@
+<p id="notice"><%= notice %></p>
+<h1>Currency Histories：コイン価格履歴</h1>
+<table class="table">
+  <thead>
+    <tr>
+      <th>通貨</th>
+      <th>取引区分</th>
+      <th>価格</th>
+      <th>量</th>
+      <th>取引日</th>
+      <th colspan="3"></th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @currency_histories.sort_by{|c|c.currency_pair + c.timestamp}.reverse.each do |c| %>
+      <tr>
+        <td><%= c.currency_pair %></td>
+        <td><%= t(c.trade_type) %></td>
+        <td><%= c.price.to_s(:delimited) %></td>
+        <td><%= c.amount.to_s(:delimited) %></td>
+        <td><%= Time.at(c.timestamp.to_i) %></td>
+        <td><%= link_to 'Show', c %></td>
+        <td><%= link_to 'Edit', edit_currency_history_path(c) %></td>
+        <td><%= link_to 'Destroy', c, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+<br>
+<%= link_to 'New Currency History', new_currency_history_path %>

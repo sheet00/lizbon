@@ -1,0 +1,35 @@
+<%= form_with(model: currency_history, local: true) do |form| %>
+	<% if currency_history.errors.any? %>
+		<div id="error_explanation">
+			<h2><%= pluralize(currency_history.errors.count, "error") %> prohibited this currency_history from being saved:</h2>
+			<ul>
+				<% currency_history.errors.full_messages.each do |message| %>
+					<li><%= message %></li>
+				<% end %>
+			</ul>
+		</div>
+	<% end %>
+	<div class="field">
+		<%= form.label :currency_pair %>
+		<%= form.text_field :currency_pair %>
+	</div>
+	<div class="field">
+		<%= form.label :trade_type %>
+		<%= form.text_field :trade_type %>
+	</div>
+	<div class="field">
+		<%= form.label :price %>
+		<%= form.text_field :price %>
+	</div>
+	<div class="field">
+		<%= form.label :amount %>
+		<%= form.text_field :amount%>
+	</div>
+	<div class="field">
+		<%= form.label :timestamp %>
+		<%= form.text_field :timestamp%>
+	</div>
+	<div class="actions">
+		<%= form.submit %>
+	</div>
+<% end %>

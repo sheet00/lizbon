@@ -1,0 +1,24 @@
+<p id="notice"><%= notice %></p>
+<h1>Trade Settings</h1>
+<table class="table">
+  <thead>
+    <tr>
+      <th>Trade type</th>
+      <th>Percent</th>
+      <th colspan="3"></th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @trade_settings.each do |trade_setting| %>
+      <tr>
+        <td><%= trade_setting.trade_type %></td>
+        <td><%= trade_setting.percent %></td>
+        <td><%= link_to 'Show', trade_setting %></td>
+        <td><%= link_to 'Edit', edit_trade_setting_path(trade_setting) %></td>
+        <td><%= link_to 'Destroy', trade_setting, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+<br>
+<%= link_to 'New Trade Setting', new_trade_setting_path %>

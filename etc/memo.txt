@@ -1,0 +1,196 @@
+﻿■no-doc
+.gemrc
+install: --no-document
+update: --no-document
+
+
+■gem初期化
+
+$ gem uninstall -I -a -x --user-install --force
+
+
+■プロジェクト
+$ gem install bundler
+$ mkdir project
+$ cd project
+$ bundle init
+Writing new Gemfile to /path/to/project/Gemfile
+
+
+gemfileコメントアウト削除
+
+bundle install --path vendor/bundle
+
+bundle exec rails new . -d mysql
+
+
+■mysql
+・「32bit」のmysqladapterダウンロード
+http://cdn.mysql.com/Downloads/Connector-C/mysql-connector-c-6.1.11-win32.zip
+
+・C:\mysql-connectorにコピー
+「libmysql.dll」を「【Rubyのディレクトリ】/lib」へコピペ。
+
+
+■Native extention
+
+railsライブラリが必須
+cmdでやること。PSは動かない。
+gem install rails
+gem install mysql2 --platform=ruby -- '--with-mysql-lib="C:\mysql-connector\lib" --with-mysql-include="C:\mysql-connector\include"'
+
+
+・テスト
+
+--mysql_test.rb
+
+require 'mysql2'
+
+client = Mysql2::Client.new(
+	:host => "yudemen.net", 
+	:database => "diary", 
+	:username => "shaat" ,
+	:password => "PH4F40eq"
+	)
+
+results = client.query("SELECT * FROM users")
+
+results.each do |row|
+	puts row
+end
+
+
+ruby mysql_test.rb
+
+データが見えたら接続OK
+
+
+■bundle
+C:\Users\Administrator\lizbon\vendor\bundle\ruby\2.4.0\gems\mysql2-0.4.10-x64-mingw32
+中身全部消す
+
+C:\Ruby24-x64\lib\ruby\gems\2.4.0\gems\mysql2-0.4.10
+上記でコンパイルしたmysqlの中身コピー
+
+
+database.yml設定
+
+rails db:migrate
+rake db:setup
+
+
+
+
+■coffee
+gemfile
+gem 'coffee-rails', '~> 4.2'
+#[Rails4 - Windows 7 の Rails で ExecJS が TypeError を吐くようになった - Qiita] http://qiita.com/scivola/items/ec7625118fcf6de5203a
+gem 'coffee-script-source', '1.8.0'
+
+
+■bootstarp
+https://github.com/twbs/bootstrap-sass
+
+
+
+■scaffold
+rails g scaffold wallet currency_type:string 'money:decimal{10,4}' -f
+rails destroy scaffold trade
+
+
+
+
+rails g scaffold active_order order_id:integer currency_pair:string action:string 'amount:decimal{12,4}' 'price:decimal{12,4}' timestamp:string transaction_id:string 'limit:decimal{12,4}' 'contract_price:decimal{12,4}' 
+
+
+
+
+	<% @wallet_histories.reverse.each do |wallet_history| %>
+		,["<%= wallet_history.created_at %>",<%= wallet_history.money %>]<br/>
+	<% end %>
+
+
+rails g scaffold trade_history order_id currency_pair action amount price fee your_action timestamp comment
+
+
+
+rails g scaffold target currency_type:string
+
+rails g scaffold currency_pair currency_pair:string 'unit_min:decimal{12,4}' 'unit_step:decimal{12,4}' unit_digest:integer currency_digest:integer
+
+rails g scaffold wallet_history currency_type:string 'money:decimal{12,4}'
+
+
+
+{"281741655"=>
+  {"currency_pair"=>"xem_jpy",
+   "action"=>"bid",
+   "amount"=>0.6,
+   "price"=>15.475,
+   "timestamp"=>"1512296870",
+   "comment"=>"32",
+   "datetime"=>2017-12-03 19:27:50 +0900},
+ "281289718"=>
+
+
+
+財布：未約定
+×：×　買い注文を実行
+○：×　売り注文を実行
+×：○　売り、買いの成約待ち
+○：○　同時存在なし
+
+
+
+
+
+
+■sublime
+Command + Shift + P
+
+
+・BeautifyRuby
+
+
+gem install htmlbeautifier
+
+settings
+
+    // Would you prefer a tab or two spaces to represent a tab
+    // The default is two spaces represented by 'space'
+    // anything else will use one tab character
+    "file_patterns": ["\\.html\\.erb", "\\.rb", "\\.rake", "Rakefile", "Gemfile", "Vagrantfile"],
+    "html_erb_patterns": ["\\.html\\.erb"],
+    "run_on_save": true,
+    "save_on_beautify": true,
+    "translate_tabs_to_spaces": false,
+    "tab_size": 2,
+    "ruby": "C:\\Ruby24-x64\\bin\\ruby -Eutf-8",
+
+
+
+・HTML-CSS-JS Prettify
+
+
+・BracketHighlighter
+
+
+真面目に仕様をつめてちょっと作ってみよっと。 
+・購入する 1分ごとに 前回価格取得時より高い 
+・ホールド
+
+前回価格取得時より安い 
+・購入時からN%未満：ホールド 
+・購入時からN%以下：売る
+
+
+
+機能
+・BOT金額設定ができる（与えるおこずかい）
+・投資対象マネーが設定できる
+・一定間隔で金額が取得できる
+・取得した金額を記録できる
+・売買履歴を記録できる
+・指定金額で購入ができる
+・指定金額で売却ができる
+・一定間隔で、購入時点からの利確、損切りパーセント判定

@@ -1,0 +1,30 @@
+<p id="notice"><%= notice %></p>
+<h1>Currency Pairs</h1>
+<table class="table">
+  <thead>
+    <tr>
+      <th>Currency pair</th>
+      <th>Unit min</th>
+      <th>Unit step</th>
+      <th>Unit digest</th>
+      <th>Currency digest</th>
+      <th colspan="3"></th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @currency_pairs.each do |c| %>
+      <tr>
+        <td><%= c.currency_pair %></td>
+        <td><%= c.unit_min %></td>
+        <td><%= c.unit_step %></td>
+        <td><%= c.unit_digest %></td>
+        <td><%= c.currency_digest %></td>
+        <td><%= link_to 'Show', c %></td>
+        <td><%= link_to 'Edit', edit_currency_pair_path(c) %></td>
+        <td><%= link_to 'Destroy', c, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+<br>
+<%= link_to 'New Currency Pair', new_currency_pair_path %>

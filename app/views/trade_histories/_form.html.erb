@@ -1,0 +1,58 @@
+<%= form_with(model: trade_history, local: true) do |form| %>
+	<% if trade_history.errors.any? %>
+		<div id="error_explanation">
+			<h2><%= pluralize(trade_history.errors.count, "error") %> prohibited this trade_history from being saved:</h2>
+			<ul>
+				<% trade_history.errors.full_messages.each do |message| %>
+					<li><%= message %></li>
+				<% end %>
+			</ul>
+		</div>
+	<% end %>
+	<div class="field">
+		<%= form.label :order_id %>
+		<%= form.text_field :order_id, id: :trade_history_order_id %>
+	</div>
+	<div class="field">
+		<%= form.label :currency_pair %>
+		<%= form.text_field :currency_pair, id: :trade_history_currency_pair %>
+	</div>
+	<div class="field">
+		<%= form.label :action %>
+		<%= form.text_field :action, id: :trade_history_action %>
+	</div>
+	<div class="field">
+		<%= form.label :amount %>
+		<%= form.text_field :amount, id: :trade_history_amount %>
+	</div>
+	<div class="field">
+		<%= form.label :price %>
+		<%= form.text_field :price, id: :trade_history_price %>
+	</div>
+	<div class="field">
+		<%= form.label :fee %>
+		<%= form.text_field :fee, id: :trade_history_fee %>
+		<div class="field">
+			<%= form.label :fee_amount %>
+			<%= form.text_field :fee_amount, id: :trade_history_fee_amount %>
+		</div>
+		<div class="field">
+			<%= form.label :your_action %>
+			<%= form.text_field :your_action, id: :trade_history_your_action %>
+		</div>
+		<div class="field">
+			<%= form.label :contract_price %>
+			<%= form.text_field :contract_price %>
+		</div>
+		<div class="field">
+			<%= form.label :timestamp %>
+			<%= form.text_field :timestamp, id: :trade_history_timestamp %>
+		</div>
+		<div class="field">
+			<%= form.label :transaction_id %>
+			<%= form.text_field :transaction_id %>
+		</div>
+		<div class="actions">
+			<%= form.submit %>
+		</div>
+	<% end %>

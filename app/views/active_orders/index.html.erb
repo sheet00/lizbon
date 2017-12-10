@@ -1,0 +1,40 @@
+<p id="notice"><%= notice %></p>
+<h1>Active Orders：未約定注文一覧</h1>
+<table class="table">
+  <thead>
+    <tr>
+      <th>取引日</th>
+      <th>transaction_id</th>
+      <th>通貨</th>
+      <th>約定金額</th>
+      <th>取引区分</th>
+      <th>数量</th>
+      <th>単価</th>
+      <th>Limit</th>
+      <th>order_id</th>
+      <th>売り下限</th>
+      <th colspan="3"></th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @active_orders.each do |active_order| %>
+      <tr>
+        <td><%= Time.at(active_order.timestamp.to_i) %></td>
+        <td><%= active_order.transaction_id %></td>
+        <td><%= active_order.currency_pair %></td>
+        <td><%= active_order.contract_price %></td>
+        <td><%= t(active_order.action) %></td>
+        <td><%= active_order.amount %></td>
+        <td><%= active_order.price %></td>
+        <td><%= active_order.limit %></td>
+        <td><%= active_order.order_id %></td>
+        <td><%= active_order.lower_limit %></td>
+        <td><%= link_to 'Show', active_order %></td>
+        <td><%= link_to 'Edit', edit_active_order_path(active_order) %></td>
+        <td><%= link_to 'Destroy', active_order, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+<br>
+<%= link_to 'New Active Order', new_active_order_path %>
