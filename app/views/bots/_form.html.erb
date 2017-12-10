@@ -1,0 +1,19 @@
+<%= form_with(model: bot, local: true) do |form| %>
+	<% if bot.errors.any? %>
+		<div id="error_explanation">
+			<h2><%= pluralize(bot.errors.count, "error") %> prohibited this bot from being saved:</h2>
+			<ul>
+				<% bot.errors.full_messages.each do |message| %>
+					<li><%= message %></li>
+				<% end %>
+			</ul>
+		</div>
+	<% end %>
+	<div class="field">
+		<%= form.label :exec_type %>
+		<%= form.text_field :exec_type, id: :bot_type %>
+	</div>
+	<div class="actions">
+		<%= form.submit %>
+	</div>
+<% end %>

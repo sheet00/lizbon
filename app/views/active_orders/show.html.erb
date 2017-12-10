@@ -1,0 +1,39 @@
+<p id="notice"><%= notice %></p>
+<p>
+	<strong>Order:</strong>
+	<%= @active_order.order_id %>
+</p>
+<p>
+	<strong>Currency pair:</strong>
+	<%= @active_order.currency_pair %>
+</p>
+<p>
+	<strong>Action:</strong>
+	<%= @active_order.action %>
+</p>
+<p>
+	<strong>Amount:</strong>
+	<%= @active_order.amount %>
+</p>
+<p>
+	<strong>Price:</strong>
+	<%= @active_order.price %>
+</p>
+<p>
+	<strong>Timestamp:</strong>
+	<%= @active_order.timestamp %>
+</p>
+<p>
+	<strong>Transaction:</strong>
+	<%= @active_order.transaction_id %>
+</p>
+<p>
+	<strong>Limit:</strong>
+	<%= @active_order.limit %>
+</p>
+<p>
+	<strong>Contract price:</strong>
+	<%= @active_order.contract_price %>
+</p>
+<%= link_to 'Edit', edit_active_order_path(@active_order) %> |
+<%= link_to 'Back', active_orders_path %>

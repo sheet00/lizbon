@@ -1,0 +1,39 @@
+<p id="notice"><%= notice %></p>
+<p>
+	<strong>Order:</strong>
+	<%= @trade_history.order_id %>
+</p>
+<p>
+	<strong>Currency pair:</strong>
+	<%= @trade_history.currency_pair %>
+</p>
+<p>
+	<strong>Action:</strong>
+	<%= @trade_history.action %>
+</p>
+<p>
+	<strong>Amount:</strong>
+	<%= @trade_history.amount %>
+</p>
+<p>
+	<strong>Price:</strong>
+	<%= @trade_history.price %>
+</p>
+<p>
+	<strong>Fee:</strong>
+	<%= @trade_history.fee %>
+</p>
+<p>
+	<strong>Your action:</strong>
+	<%= @trade_history.your_action %>
+</p>
+<p>
+	<strong>Timestamp:</strong>
+	<%= @trade_history.timestamp %>
+</p>
+<p>
+	<strong>transaction_id:</strong>
+	<%= @trade_history.transaction_id %>
+</p>
+<%= link_to 'Edit', edit_trade_history_path(@trade_history) %> |
+<%= link_to 'Back', trade_histories_path %>

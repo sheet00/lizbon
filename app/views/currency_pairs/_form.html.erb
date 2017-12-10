@@ -1,0 +1,42 @@
+<%= form_with(model: currency_pair, local: true) do |form| %>
+  <% if currency_pair.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(currency_pair.errors.count, "error") %> prohibited this currency_pair from being saved:</h2>
+
+      <ul>
+      <% currency_pair.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= form.label :currency_pair %>
+    <%= form.text_field :currency_pair, id: :currency_pair_currency_pair %>
+  </div>
+
+  <div class="field">
+    <%= form.label :unit_min %>
+    <%= form.text_field :unit_min, id: :currency_pair_unit_min %>
+  </div>
+
+  <div class="field">
+    <%= form.label :unit_step %>
+    <%= form.text_field :unit_step, id: :currency_pair_unit_step %>
+  </div>
+
+  <div class="field">
+    <%= form.label :unit_digest %>
+    <%= form.number_field :unit_digest, id: :currency_pair_unit_digest %>
+  </div>
+
+  <div class="field">
+    <%= form.label :currency_digest %>
+    <%= form.number_field :currency_digest, id: :currency_pair_currency_digest %>
+  </div>
+
+  <div class="actions">
+    <%= form.submit %>
+  </div>
+<% end %>

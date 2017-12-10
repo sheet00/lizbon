@@ -1,0 +1,194 @@
+<% @page_title = get_market_capital.round.to_s + "円" %>
+<%
+#json-data
+data = [['date','money']]
+@wallet_histories.reverse.each{|w|
+  data << [ w.created_at.strftime("%H:%M"),w.money]
+}
+
+%>
+<p id="notice"><%= notice %></p>
+<h1>りずぼんちゃん　時価総額(JPY):<%=get_market_capital.round.to_s%>円</h1>
+<h3></h3>
+<div class="pull-right hidden-xs">
+  <% @t_settings.each do |s| %>
+    <button type="button" class="btn btn-default"><%= s.trade_type %>:<%= s.percent.to_s %>%</button>
+  <% end %>
+</div>
+<div>
+  <%= link_to 'りずぼんちゃん実行', {:controller => "exec", :action => "index"}, { :class => "btn btn-primary" } %>
+</div>
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<script type="text/javascript">
+  google.charts.load('current', {'packages':['corechart']});
+  google.charts.setOnLoadCallback(drawChart);
+  
+  function drawChart() {
+    var $w_data = JSON.parse($("#wallet_history").text());
+  // 'false' means that the first row contains labels, not data.
+  var data = google.visualization.arrayToDataTable($w_data,false);
+  var options = {
+    hAxis: {
+      title: '入出金履歴',
+      slantedTextAngle: 90
+    },
+    width: 1500,
+    height: 500,
+    legend: { position: 'none'}
+  };
+  
+  var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
+  chart.draw(data, options);
+  }
+</script>
+<div id="wallet_history" class="hide">
+  <%= data%>
+</div>
+<div id="chart_div" class="hidden-xs"></div>
+<div class="row">
+  <!--wallet-->
+  <div class="col-md-3">
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        お財布
+      </div>
+      <div class="panel-body">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Currency type</th>
+              <th>Money</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @wallets.each do |wallet| %>
+              <tr>
+                <td>
+                  <%= wallet.currency_type %>
+                  <% if wallet.is_loscat %>
+                    <span class="label label-danger">loscut</span>
+                  <% end %>
+                </td>
+                <td><%= wallet.money %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <!--active order-->
+  <div class="col-md-9">
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        未約定注文一覧
+      </div>
+      <div class="panel-body">
+        <div class="table-responsive">
+          <table class="table">
+            <thead>
+              <tr>
+                <th></th>
+                <th>取引日</th>
+                <th>transaction_id</th>
+                <th>通貨</th>
+                <th>単価</th>
+                <th>区分</th>
+                <th>数量</th>
+                <th>約定金額</th>
+                <th>売り下限</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% @active_orders.each do |active_order| %>
+                <tr>
+                  <td><%= link_to("キャンセル",
+                {controller: :active_orders, action: :cancel, id: active_order.order_id},
+                {class: "btn btn-warning btn-xs"}) %></td>
+                  <td><%= Time.at(active_order.timestamp.to_i) %></td>
+                  <td><%= active_order.transaction_id %></td>
+                  <td><%= active_order.currency_pair %></td>
+                  <td><%= active_order.price %></td>
+                  <td><%= t(active_order.action) %></td>
+                  <td><%= active_order.amount %></td>
+                  <td><%= active_order.contract_price %></td>
+                  <td><%= active_order.lower_limit %></td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!--Trade-->
+<div class="row">
+  <!--master-->
+  <div class="col-md-3">
+    <div class="panel panel-default">
+      <div class="panel-heading">実行結果</div>
+      <div class="panel-body table-responsive">
+        <table class="table">
+          <tbody>
+            <% trade_type = nil %>
+            <% @bots.each do |bot| %>
+              <% #連続待ちの場合は無視 %>
+              <% next if trade_type == bot.trade_type and (trade_type == "wait" or trade_type == "相場安定待ち" ) %>
+              <tr class="<%=label_state(bot.trade_type)%>">
+                <td>
+                  <%= bot.created_at.to_s %><br/>
+              <span class="label label-<%=label_state(bot.trade_type)%>"><%= bot.currency_type %></span>
+              <%= t(bot.trade_type) %>
+            </td>
+          </tr>
+          <% trade_type = bot.trade_type %>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>
+</div>
+<!--log-->
+<div class="col-md-9">
+  <div class="panel panel-default">
+    <div class="panel-heading">取引履歴</div>
+    <div class="panel-body">
+      <div class="table-responsive">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>取引日付</th>
+              <th>transaction_id</th>
+              <th>通貨</th>
+              <th>区分</th>
+              <th>単価</th>
+              <th>数量</th>
+              <th>約定代金</th>
+              <th>fee</th>
+              <th>fee_amount</th>
+              <th>order_id</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @trade_histories.each do |trade_history| %>
+              <tr>
+                <td><%= Time.at(trade_history.timestamp.to_i) %></td>
+                <td><%= trade_history.transaction_id %></td>
+                <td><%= trade_history.currency_pair %></td>
+                <td><%= t(trade_history.your_action) %></td>
+                <td><%= trade_history.price.to_s(:delimited)%></td>
+                <td><%= trade_history.amount.to_s(:delimited)%></td>
+                <td><%= trade_history.contract_price.to_s(:delimited)%></td>
+                <td><%= trade_history.fee.to_s(:delimited)%></td>
+                <td><%= trade_history.fee_amount.to_s(:delimited)%></td>
+                <td><%= trade_history.order_id %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+</div>

@@ -1,0 +1,23 @@
+<p id="notice"><%= notice %></p>
+<p>
+	<strong>currency_pair:</strong>
+	<%= @currency_history.currency_pair %>
+</p>
+<p>
+	<strong>trade_type:</strong>
+	<%= @currency_history.trade_type %>
+</p>
+<p>
+	<strong>price:</strong>
+	<%= @currency_history.price %>
+</p>
+<p>
+	<strong>amount:</strong>
+	<%= @currency_history.amount %>
+</p>
+<p>
+	<strong>timestamp:</strong>
+	<%= @currency_history.timestamp %>
+</p>
+<%= link_to 'Edit', edit_currency_history_path(@currency_history) %> |
+<%= link_to 'Back', currency_histories_path %>
