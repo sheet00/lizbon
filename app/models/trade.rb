@@ -9,7 +9,7 @@ class Trade
     )
 
     #テストの場合はAPI未実行
-    @is_test = false
+    @is_test = true
   end
 
   #例外処理 戻り値はブロック実行結果
@@ -36,56 +36,9 @@ class Trade
 
   #取引実行
   def execute
-    #1.価格取得
-    ActiveRecord::Base.transaction do
-      Target.all.each{|t|
-        get_last_price(t.currency_type)
-      }
-    end
-
-
-    #一回辺りの購入額計算
-    #処理ごと通貨ステータスが切り替わるため、ループ前に用意
-    buy_money = get_once_buy_money
-
-
-    #通貨マスタ全データ
-    Target.all.each{|t|
-      #トランザクションは通貨処理単位
-      ActiveRecord::Base.transaction do
-
-        c_type = t.currency_type
-
-        #2.取引判定
-        trade_type = trade_type(c_type)
-
-        #3.取引
-        case trade_type
-        when "bid","ask" then
-          result = trade(trade_type, c_type, buy_money: buy_money)
-
-        when "wait" then
-          #キャンセル判定
-          if do_cancel?(c_type)
-            result = auto_cancel(c_type)
-          else
-            result = "wait"
-          end
-
-        else
-          result = trade_type
-        end
-
-        #bot実行ログ
-        Bot.create(trade_type: result,currency_type: c_type)
-
-      end
-    }
-
-
-    #4.取引履歴一覧更新
-    #5.買い成約：Walletに購入コインを追加　売り成約：WalletにJPY追加
-    #6.未成約一覧削除
+    #1.取引履歴一覧更新
+    #2.買い成約：Walletに購入コインを追加　売り成約：WalletにJPY追加
+    #3.未成約一覧削除
     ActiveRecord::Base.transaction do
       #今回取得できた取引成立レコード
       trades = get_trade_history
@@ -123,6 +76,52 @@ class Trade
       #取引成立分の未成約一覧削除
       ActiveOrder.delete_close_order
     end
+
+    #4.価格取得
+    ActiveRecord::Base.transaction do
+      Target.all.each{|t|
+        get_last_price(t.currency_type)
+      }
+    end
+
+    #一回辺りの購入額計算
+    #処理ごと通貨ステータスが切り替わるため、ループ前に用意
+    buy_money = get_once_buy_money
+
+
+    #5.通貨ごとトレード
+    Target.all.each{|t|
+      #トランザクションは通貨処理単位
+      ActiveRecord::Base.transaction do
+
+        c_type = t.currency_type
+
+        #2.取引判定
+        trade_type = trade_type(c_type)
+
+        #3.取引
+        case trade_type
+        when "bid","ask" then
+          result = trade(trade_type, c_type, buy_money: buy_money)
+
+        when "wait" then
+          #キャンセル判定
+          if do_cancel?(c_type)
+            result = auto_cancel(c_type)
+          else
+            result = "wait"
+          end
+
+        else
+          result = trade_type
+        end
+
+        #bot実行ログ
+        Bot.create(trade_type: result,currency_type: c_type)
+
+      end
+    }
+
   end
 
 
@@ -206,15 +205,27 @@ class Trade
   # ×：×　買い注文を実行
   # ○：×　売り注文を実行
   # ×：○　売り、買いの成約待ち
-  # ○：○　同時存在なし
+  # ○：○　成約待ち中に、手動でお財布に入れたとき>>売り、買いの成約待ち
   #c_type:通貨コード
   def trade_type(c_type)
+    has_order = ActiveOrder.where(:currency_pair =>pair).any?
+
+    #待ち
+    # 財布：未約定
+    # ×：○　売り、買いの成約待ち
+    # ○：○　成約待ち中に、手動でお財布に入れたとき>>売り、買いの成約待ち
+    #未約定がある段階で必ず待ち
+    return "wait" if has_order
+
+
     #最小単位以下であれば購入金額なし、とみなす>>買い注文へ
     pair = c_type + "_jpy"
     unit_min = CurrencyPair.where(currency_pair: pair).first.unit_min
     has_wallet = Wallet.where("currency_type = ? and ? <= money", c_type, unit_min).any?
-    has_order = ActiveOrder.where(:currency_pair =>pair).any?
 
+    #買い
+    # 財布：未約定
+    # ×：×　買い注文を実行
     if not has_wallet and not has_order then
       #相場確認
       ave_list = get_average_list(c_type)
@@ -234,12 +245,11 @@ class Trade
 
     end
 
+    #売り
+    # 財布：未約定
+    # ○：×　売り注文を実行
     if has_wallet and not has_order then
       return "ask"
-    end
-
-    if not has_wallet and has_order then
-      return "wait"
     end
   end
 
