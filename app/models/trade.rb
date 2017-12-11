@@ -138,6 +138,9 @@ class Trade
       #財布に戻す
       order = ActiveOrder.where(order_id: order_id).first
 
+      #別プロセスで消されていた場合を考慮し、未約定一覧にデータがあるときのみ、財布に戻す
+      return unless order.present?
+
       #bid jpyを戻す
       if order.action == "bid"
         #ask 通貨を戻す
