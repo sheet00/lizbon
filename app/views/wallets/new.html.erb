@@ -1,5 +1,3 @@
 <h1>New Wallet</h1>
-
-<%= render 'form', wallet: @wallet %>
-
+<%= render partial: 'form', locals: {wallet: @wallet, url: @wallet} %>
 <%= link_to 'Back', wallets_path %>

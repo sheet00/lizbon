@@ -1,5 +1,5 @@
 class WalletsController < ApplicationController
-  before_action :set_wallet, only: [:show, :edit, :update, :destroy, :add, :add_money]
+  before_action :set_wallet, only: [:show, :edit, :update, :destroy, :add]
 
   # GET /wallets
   # GET /wallets.json
@@ -65,6 +65,7 @@ class WalletsController < ApplicationController
 
   #資金追加
   def add
+    @wallet.money = 0
   end
 
   def add_money
