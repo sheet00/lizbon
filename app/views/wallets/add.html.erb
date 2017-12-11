@@ -1,4 +1,4 @@
 <h1>お財布追加</h1>
-<%= render 'form', wallet: @wallet %>
+<%= render partial: 'form', locals: {wallet: @wallet, url: add_money_wallet_path} %>
 <%= link_to 'Show', @wallet %> |
 <%= link_to 'Back', wallets_path %>
