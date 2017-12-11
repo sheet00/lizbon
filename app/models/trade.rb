@@ -9,7 +9,7 @@ class Trade
     )
 
     #テストの場合はAPI未実行
-    @is_test = true
+    @is_test = false
   end
 
   #例外処理 戻り値はブロック実行結果
@@ -211,6 +211,7 @@ class Trade
   # ○：○　成約待ち中に、手動でお財布に入れたとき>>売り、買いの成約待ち
   #c_type:通貨コード
   def trade_type(c_type)
+    pair = c_type + "_jpy"
     has_order = ActiveOrder.where(:currency_pair =>pair).any?
 
     #待ち
@@ -222,7 +223,6 @@ class Trade
 
 
     #最小単位以下であれば購入金額なし、とみなす>>買い注文へ
-    pair = c_type + "_jpy"
     unit_min = CurrencyPair.where(currency_pair: pair).first.unit_min
     has_wallet = Wallet.where("currency_type = ? and ? <= money", c_type, unit_min).any?
 
