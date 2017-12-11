@@ -1,24 +1,33 @@
+lizbon
+====
+
+Overview
+zaif exchangeでトレードするよ
+
 # README
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
-
-Things you may want to cover:
-
 * Ruby version
+2.1.4
 
 * System dependencies
+rails 5.1.4
 
 * Configuration
+zaif APIからキーを取得してsecret.ymlに記載
 
 * Database creation
+rails db:migrate
 
 * Database initialization
+rails db:seed
 
 * How to run the test suite
+testがないこわい
 
-* Services (job queues, cache servers, search engines, etc.)
+## Usage
+wget http://hogehoge.net/lizbon/exec/index
 
-* Deployment instructions
+## Install
+bundle install
 
-* ...
+`幸運を祈る`
