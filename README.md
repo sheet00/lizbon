@@ -17,7 +17,4 @@ zaif APIからキーを取得してsecret.ymlに記載
 ## Usage
 wget http://hogehoge.net/lizbon/exec/index
 
-## Install
-bundle install
-
 `幸運を祈る`

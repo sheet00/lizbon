@@ -429,9 +429,25 @@ class Trade
   def get_trade_history
 
     #トレード成約は毎分10以下を想定
+    #通貨指定なしの場合、下記のみ取得
+    #btc_jpy/mona_jpy/xem_jpy/xem_btc/mona_btc/
     trades = retry_on_error do
       @api.get_my_trades({count: 10})
     end
+
+    #上記外のトレード取得
+    Target.where.not(currency_type: ["btc","mona","xem"]).each{|t|
+      c_pair = "#{t.currency_type}_jpy"
+      other_trades = retry_on_error do
+        @api.get_my_trades({count: 10,currency_pair: c_pair})
+      end
+
+      #別通貨分を結合
+      trades.update(other_trades)
+    }
+
+
+    ApplicationController.helpers.log("[all]",trades)
 
     #成約一覧
     result = []
@@ -454,7 +470,8 @@ class Trade
         action = data["action"]
         amount = data["amount"]
         price = data["price"]
-        fee = data["fee"]
+        #feeが設定ない通貨あり
+        fee = data["fee"].presence || 0
         fee_amount = data["fee_amount"]
         contract_price = (amount * price).round(4)
         your_action = data["your_action"]
