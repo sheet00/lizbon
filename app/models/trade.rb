@@ -20,10 +20,8 @@ class Trade
       try += 1
       result = yield
     rescue => e
-      return e.message if e.message == "order not found"
-
       pp "retry:" + try.to_s
-      sleep 2
+      sleep 3
 
       retry if try < times
       raise
@@ -128,19 +126,38 @@ class Trade
   #未約定一覧から該当注文をキャンセルする
   #財布にもお金を戻す
   def order_cancel(order_id)
+    order = ActiveOrder.where(order_id: order_id).first
+
+    #別プロセスで消されていた場合は何もしない
+    return unless order.present?
+
+    #zaif上のデータ存在確認
+    zaif_orders = retry_on_error do
+      @api.get_active_orders({currency_pair: order.currency_pair})
+    end
+
+    zaif_ids = []
+
+    #zaif上のorder_ids
+    zaif_ids = zaif_orders.each{|z| zaif_ids << z[0]}
+
     ActiveRecord::Base.transaction do
 
-      #APIキャンセル
-      result = retry_on_error do
-        @api.cancel(order_id)
+      #既にzaif上に存在しないIDを指定すると例外になるため、サーバー上に存在するデータのみAPIキャンセル実行
+      if zaif_ids.include?(order_id)
+        result = retry_on_error do
+          #キャンセル時、ペア指定必須(トークンの場合指定必須のため)
+          @api.cancel(order_id, order.currency_pair)
+        end
+
+        ApplicationController.helpers.log("[active_order][cancel][api result]",result)
+      else
+        ApplicationController.helpers.log("[active_order][cancel][api result]","zaif server order not found!!")
       end
 
+
+
       #財布に戻す
-      order = ActiveOrder.where(order_id: order_id).first
-
-      #別プロセスで消されていた場合を考慮し、未約定一覧にデータがあるときのみ、財布に戻す
-      return unless order.present?
-
       #bid jpyを戻す
       if order.action == "bid"
         #ask 通貨を戻す
@@ -152,9 +169,6 @@ class Trade
 
       #データ削除
       ActiveOrder.where(order_id: order_id).delete_all
-
-      ApplicationController.helpers.log("[active_order][cancel][api result]",result)
-
     end
   end
 
@@ -321,9 +335,6 @@ class Trade
 
 
 
-
-
-
     #即時成立、未成立にかかわらず、必ず未約定オーダーに保存する
     #後処理で入金処理する際、未約定に含まれているか？を確認するため
 
@@ -446,8 +457,6 @@ class Trade
       trades.update(other_trades)
     }
 
-
-    ApplicationController.helpers.log("[all]",trades)
 
     #成約一覧
     result = []
@@ -572,12 +581,6 @@ class Trade
     amount = Wallet.where(currency_type: c_type).first.money
 
     return floor_amount(c_type,amount)
-  end
-
-
-  #未成約注文一覧
-  def get_active_order
-    pp @api.get_active_orders
   end
 
 
