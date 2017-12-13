@@ -320,15 +320,13 @@ class Trade
       end
       ApplicationController.helpers.log("テスト実行","テスト実行")
     else
+      #売買トレードはリトライしない
+      #API上エラーで返っても、API上通ってる可能性があるため
       result =
       if trade_type == "bid"
-        retry_on_error do
-          @api.bid(c_type,price,amount,"jpy",transaction_id)
-        end
+        @api.bid(c_type,price,amount,"jpy",transaction_id)
       else
-        retry_on_error do
-          @api.ask(c_type,price,amount,"jpy",transaction_id)
-        end
+        @api.ask(c_type,price,amount,"jpy",transaction_id)
       end
     end
 
