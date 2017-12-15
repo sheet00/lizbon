@@ -1,14 +1,14 @@
-<% @page_title = get_market_capital.round.to_s + "円" %>
+<% @page_title = get_market_capital.round.to_s(:delimited) + "円" %>
 <%
 #json-data
 data = [['date','money']]
 @wallet_histories.reverse.each{|w|
-  data << [ w.created_at.strftime("%H:%M"),w.money]
+  data << [ w.trade_time.strftime("%H:%M"), w.money.round]
 }
 
 %>
 <p id="notice"><%= notice %></p>
-<h1>りずぼんちゃん　時価総額(JPY):<%=get_market_capital.round.to_s%>円</h1>
+<h1>りずぼんちゃん　時価総額(JPY):<%=get_market_capital.round.to_s(:delimited)%>円</h1>
 <h3></h3>
 <div class="pull-right hidden-xs">
   <% @t_settings.each do |s| %>
@@ -17,6 +17,7 @@ data = [['date','money']]
 </div>
 <div>
   <%= link_to 'りずぼんちゃん実行', {:controller => "exec", :action => "index"}, { :class => "btn btn-primary" } %>
+  <%= link_to "Zaif同期", sync_zaif_active_orders_path, {class: "btn btn-default"}%>
 </div>
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 <script type="text/javascript">
@@ -42,9 +43,9 @@ data = [['date','money']]
   }
 </script>
 <div id="wallet_history" class="hide">
-  <%= data%>
+  <%= data %>
 </div>
-<div id="chart_div" class="hidden-xs"></div>
+<div id="chart_div" class="hidden-xs <%= 'hide' if not @wallet_histories.any? %>"></div>
 <div class="row">
   <!--wallet-->
   <div class="col-md-3">
@@ -69,7 +70,7 @@ data = [['date','money']]
                     <span class="label label-danger">loscut</span>
                   <% end %>
                 </td>
-                <td><%= wallet.money %></td>
+                <td><%= wallet.money.to_s(:delimited) %></td>
               </tr>
             <% end %>
           </tbody>
@@ -92,8 +93,8 @@ data = [['date','money']]
                 <th>取引日</th>
                 <th>transaction_id</th>
                 <th>通貨</th>
-                <th>単価</th>
                 <th>区分</th>
+                <th>単価</th>
                 <th>数量</th>
                 <th>約定金額</th>
                 <th>売り下限</th>
@@ -102,14 +103,12 @@ data = [['date','money']]
             <tbody>
               <% @active_orders.each do |active_order| %>
                 <tr>
-                  <td><%= link_to("キャンセル",
-                {controller: :active_orders, action: :cancel, id: active_order.order_id},
-                {class: "btn btn-warning btn-xs"}) %></td>
+                  <td><%= link_to "キャンセル", cancel_active_order_path(active_order.order_id), {class: "btn btn-warning btn-xs"} %></td>
                   <td><%= Time.at(active_order.timestamp.to_i) %></td>
                   <td><%= active_order.transaction_id %></td>
                   <td><%= active_order.currency_pair %></td>
-                  <td><%= active_order.price %></td>
                   <td><%= t(active_order.action) %></td>
+                  <td><%= active_order.price %></td>
                   <td><%= active_order.amount %></td>
                   <td><%= active_order.contract_price %></td>
                   <td><%= active_order.lower_limit %></td>
@@ -137,58 +136,58 @@ data = [['date','money']]
               <% next if trade_type == bot.trade_type and (trade_type == "wait" or trade_type == "相場安定待ち" ) %>
               <tr class="<%=label_state(bot.trade_type)%>">
                 <td>
-                  <%= bot.created_at.to_s %><br/>
-              <span class="label label-<%=label_state(bot.trade_type)%>"><%= bot.currency_type %></span>
-              <%= t(bot.trade_type) %>
-            </td>
-          </tr>
-          <% trade_type = bot.trade_type %>
-        <% end %>
-      </tbody>
-    </table>
-  </div>
-</div>
-</div>
-<!--log-->
-<div class="col-md-9">
-  <div class="panel panel-default">
-    <div class="panel-heading">取引履歴</div>
-    <div class="panel-body">
-      <div class="table-responsive">
-        <table class="table">
-          <thead>
-            <tr>
-              <th>取引日付</th>
-              <th>transaction_id</th>
-              <th>通貨</th>
-              <th>区分</th>
-              <th>単価</th>
-              <th>数量</th>
-              <th>約定代金</th>
-              <th>fee</th>
-              <th>fee_amount</th>
-              <th>order_id</th>
-            </tr>
-          </thead>
-          <tbody>
-            <% @trade_histories.each do |trade_history| %>
-              <tr>
-                <td><%= Time.at(trade_history.timestamp.to_i) %></td>
-                <td><%= trade_history.transaction_id %></td>
-                <td><%= trade_history.currency_pair %></td>
-                <td><%= t(trade_history.your_action) %></td>
-                <td><%= trade_history.price.to_s(:delimited)%></td>
-                <td><%= trade_history.amount.to_s(:delimited)%></td>
-                <td><%= trade_history.contract_price.to_s(:delimited)%></td>
-                <td><%= trade_history.fee.to_s(:delimited)%></td>
-                <td><%= trade_history.fee_amount.to_s(:delimited)%></td>
-                <td><%= trade_history.order_id %></td>
+                  <%= bot.created_at.to_s %><br>
+                  <span class="label label-<%=label_state(bot.trade_type)%>"><%= bot.currency_type %></span>
+                  <%= t(bot.trade_type) %>
+                </td>
               </tr>
+              <% trade_type = bot.trade_type %>
             <% end %>
           </tbody>
         </table>
       </div>
     </div>
   </div>
-</div>
+  <!--log-->
+  <div class="col-md-9">
+    <div class="panel panel-default">
+      <div class="panel-heading">取引履歴</div>
+      <div class="panel-body">
+        <div class="table-responsive">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>取引日</th>
+                <th>transaction_id</th>
+                <th>通貨</th>
+                <th>区分</th>
+                <th>単価</th>
+                <th>数量</th>
+                <th>約定代金</th>
+                <th>fee</th>
+                <th>fee_amount</th>
+                <th>order_id</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% @trade_histories.each do |trade_history| %>
+                <tr>
+                  <td><%= Time.at(trade_history.timestamp.to_i) %></td>
+                  <td><%= trade_history.transaction_id %></td>
+                  <td><%= trade_history.currency_pair %></td>
+                  <td><%= t(trade_history.your_action) %></td>
+                  <td><%= trade_history.price.to_s(:delimited)%></td>
+                  <td><%= trade_history.amount.to_s(:delimited)%></td>
+                  <td><%= trade_history.contract_price.to_s(:delimited)%></td>
+                  <td><%= trade_history.fee.to_s(:delimited)%></td>
+                  <td><%= trade_history.fee_amount.to_s(:delimited)%></td>
+                  <td><%= trade_history.order_id %></td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>

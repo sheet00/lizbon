@@ -4,7 +4,7 @@ class WalletHistoriesController < ApplicationController
   # GET /wallet_histories
   # GET /wallet_histories.json
   def index
-    from = DateTime.now - 1.days
+    from = DateTime.now - 2.days
     @wallet_histories = WalletHistory.where("? <= created_at",from).order("id desc")
   end
 
