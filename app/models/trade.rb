@@ -81,7 +81,7 @@ class Trade
         end
 
         #bot実行ログ
-        Bot.create(trade_type: result, currency_type: c_type, trade_time: DateTime.now)
+        Bot.create(trade_type: result, currency_type: c_type)
       end
     }
 
@@ -122,7 +122,7 @@ class Trade
   #を同期する
   def sync_zaif
     sync_trade_history
-    #sync_active_order
+    sync_active_order
   end
 
 
@@ -309,25 +309,7 @@ class Trade
     )
 
     active_order.save
-
     ApplicationController.helpers.log("[trade][#{trade_type}][#{c_type}][api result]",result)
-    ApplicationController.helpers.log("[trade][#{trade_type}][#{c_type}][AR]",active_order)
-
-
-
-
-    #お財布処理
-    if trade_type == "bid"
-      wallet_currency = "jpy"
-      money = contract_price
-    else
-      wallet_currency = c_type
-      money = amount
-    end
-
-    #購入キューを入れた段階で、お財布から購入マイナス
-    Wallet.add_wallet(wallet_currency, -1 * money)
-
 
     return trade_type
   end
@@ -524,8 +506,12 @@ class Trade
 
 
   #取引履歴一覧を同期する
-  #　買い成約：Walletに購入コインを追加
-  #　売り成約：WalletにJPY追加
+  #買い成約
+  #購入JPYを引き落とし
+  #Walletに購入コインを追加
+  #売り成約
+  #WalletにJPY追加
+  #売却コインを引き落とし
   def sync_trade_history
 
     #今回取得できた取引成立レコード
@@ -555,7 +541,6 @@ class Trade
       #一意のorder_idで取引履歴を記録すること
       next if TradeHistory.where(order_id: order_id).any?
 
-
       ActiveRecord::Base.transaction do
 
         #取引履歴記録
@@ -576,18 +561,34 @@ class Trade
 
         #お財布追加
         #未成約一覧は別同期しているので、ここでは管理しない
-        #新規登録分のみ、金額加算
-        c_type = t_history.currency_pair.gsub("_jpy","")
+        c_type = currency_pair.gsub("_jpy","")
 
-        #買い>>購入した通貨(量)をお財布に入れる
-        #売り>>売ったJPYをお財布に入れる
+
+        #買い成約
+        #購入JPYを引き落とし
+        #Walletに購入コインを追加
         #fee
         #買ったとき：対象通貨の数量がひかれる
-        #売ったとき：JPYからひかれる
-        if t_history.your_action == "bid"
-          Wallet.add_wallet(c_type, t_history.amount - t_history.fee_amount, Time.at(t_history.timestamp.to_i))
+
+        trade_time = Time.at(timestamp.to_i)
+
+        if your_action == "bid"
+          #jpy引き落とし
+          Wallet.add_wallet("jpy", -1.0 * contract_price, trade_time)
+          #c_type追加
+          Wallet.add_wallet(c_type, amount - fee_amount, trade_time)
+
+
+          #売り成約
+          #WalletにJPY追加
+          #売却コインを引き落とし
+          #fee
+          #売ったとき：JPYからひかれる
         else
-          Wallet.add_wallet("jpy", t_history.contract_price - t_history.fee_amount, Time.at(t_history.timestamp.to_i))
+          #jpy追加
+          Wallet.add_wallet("jpy", contract_price - fee_amount, trade_time)
+          #c_type引き落とし
+          Wallet.add_wallet(c_type, -1.0 * amount, trade_time)
 
           #loscat成立の場合は、フラグ解除
           wallet = Wallet.where(currency_type: c_type).first
@@ -597,18 +598,18 @@ class Trade
           end
         end
 
-        result = t_history.your_action == "bid" ? "買い確定" : "売り確定"
-        Bot.create(trade_type: result, currency_type: c_type, trade_time: Time.at(t_history.timestamp.to_i))
+        result = your_action == "bid" ? "買い確定" : "売り確定"
+        Bot.create(trade_type: result, currency_type: c_type)
       end
       #transaction end
 
+
+      if trades.present?
+        ApplicationController.helpers.log("[sync_trade_history][api result]", t)
+      end
+
     } #trade.each
 
-
-
-    if trades.present?
-      ApplicationController.helpers.log("[sync_trade_history][api result]", trades)
-    end
   end
 
 
@@ -618,25 +619,31 @@ class Trade
     #トレード成約は毎分10以下を想定
     #通貨指定なしの場合、下記のみ取得
     #btc_jpy/mona_jpy/xem_jpy/xem_btc/mona_btc/
-    count = 100
+    count = 10
     trades = retry_on_error do
       @api.get_my_trades({count: count})
     end
 
-    # #上記外のトレード取得
-    # Target.where.not(currency_type: ["btc","mona","xem"]).each{|t|
-    #   c_pair = "#{t.currency_type}_jpy"
-    #   other_trades = retry_on_error do
-    #     @api.get_my_trades({count: count, currency_pair: c_pair})
-    #   end
+    #上記外のトレード取得
+    Target.where.not(currency_type: ["btc","mona","xem"]).each{|t|
+      c_pair = "#{t.currency_type}_jpy"
+      other_trades = retry_on_error do
+        @api.get_my_trades({count: count, currency_pair: c_pair})
+      end
 
-    #   #別通貨分を結合
-    #   trades.update(other_trades)
-    # }
+      #別通貨分を結合
+      trades.update(other_trades)
+    }
 
     #コメントデータがないものは人間発注なので対象外
-    trades = trades.select{|k,v| v["comment"] != ""}
-    ap trades
+    trades.select! {|k,v| v["comment"] != ""}
+
+    #入金履歴は取引時間が古い～新しいで記録される必要があるため、ソート必須
+    #第一キーdatetime, 第二キーorder_id
+    trades = trades.to_a.sort_by {|a|
+      [a[1]["datetime"], a[0]]
+    }
+
     return trades
   end
 

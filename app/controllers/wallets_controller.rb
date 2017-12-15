@@ -70,7 +70,7 @@ class WalletsController < ApplicationController
 
   def add_money
     money = wallet_params[:money].to_f
-    Wallet.add_wallet("jpy",money)
+    Wallet.add_wallet("jpy",money,DateTime.now)
 
     respond_to do |format|
       format.html { redirect_to wallets_url, notice: "#{money}円追加" }

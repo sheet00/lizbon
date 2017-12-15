@@ -1,4 +1,11 @@
-﻿■no-doc
+﻿sync_order
+ローカル削除するときのみ、
+取引履歴更新実行
+それでも未約定にのこっていたら削除
+
+
+
+■no-doc
 .gemrc
 install: --no-document
 update: --no-document
