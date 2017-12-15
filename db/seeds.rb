@@ -12,6 +12,7 @@ CurrencyPair.create(
     {currency_pair: "bch_jpy", unit_min: 0.0001, unit_step: 0.0001, unit_digest: 4, currency_digest: -1},
     {currency_pair: "xem_jpy", unit_min: 0.1, unit_step: 0.1, unit_digest: 1, currency_digest: 4},
     {currency_pair: "mona_jpy", unit_min: 1, unit_step: 1, unit_digest: 0, currency_digest: 0},
+    {currency_pair: "eth_jpy", unit_min: 0.0001, unit_step: 0.0001, unit_digest: 4, currency_digest: -1},
   ]
 )
 
@@ -21,7 +22,7 @@ Target.create([{currency_type: "xem"},{currency_type: "btc"}])
 
 TradeSetting.create(
   [
-    {trade_type: :buy, percent: 1},
+    {trade_type: :buy, percent: 0.99},
     {trade_type: :sell_upper, percent: 1.05},
     {trade_type: :sell_lower, percent: 0.9}
   ]

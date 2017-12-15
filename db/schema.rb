@@ -85,8 +85,9 @@ ActiveRecord::Schema.define(version: 20171212124900) do
   end
 
   create_table "wallet_histories", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
-    t.string "currency_type"
-    t.decimal "money", precision: 12, scale: 4
+    t.string "currency_type", null: false
+    t.decimal "money", precision: 12, scale: 4, null: false
+    t.datetime "trade_time", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
