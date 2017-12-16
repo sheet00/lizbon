@@ -52,7 +52,6 @@ class Trade
     #処理ごと通貨ステータスが切り替わるため、ループ前に用意
     buy_money = get_once_buy_money
 
-
     #通貨ごとトレード
     Target.all.each{|t|
       #トランザクションは通貨処理単位
@@ -122,8 +121,8 @@ class Trade
   #------------------------------------------
   private
 
-  #今回実行時に1通貨で利用可能な金額の判定
-  #全通貨のtrade_typeをカウントし計算
+  #　今回実行時に1通貨で利用可能な金額の判定
+  #　全通貨のtrade_typeをカウントし計算
   def get_once_buy_money
     count = 0
     Target.all.each{|t|
@@ -132,7 +131,13 @@ class Trade
 
     return 0 if count == 0
 
-    buy_money = Wallet.where(currency_type: :jpy).first.money / count
+    #実財布ではなく、買い注文中の金額は除外して計算
+    #お財布100円
+    #先注文A100円
+    #実財布には100円残っているので再度注文B100円
+    #注文AとBが成立が成立した場合、-200円になってしまう
+    ex_wallet = Wallet.exclude_order.select{|w| w.currency_type == "jpy"}.first
+    buy_money = ex_wallet.money / count
     return buy_money.floor
   end
 
@@ -174,24 +179,25 @@ class Trade
   # ○：×　売り注文を実行
   # ×：○　売り、買いの成約待ち
   # ○：○　成約待ち中に、手動でお財布に入れたとき>>売り、買いの成約待ち
-  #c_type:通貨コード
+  # c_type:通貨コード
   def trade_type(c_type)
     pair = c_type + "_jpy"
     has_order = ActiveOrder.where(:currency_pair =>pair).any?
 
-    #待ち
+    # 待ち
     # 財布：未約定
     # ×：○　売り、買いの成約待ち
     # ○：○　成約待ち中に、手動でお財布に入れたとき>>売り、買いの成約待ち
-    #未約定がある段階で必ず待ち
+    # 未約定がある段階で必ず待ち
     return "wait" if has_order
 
 
-    #最小単位以下であれば購入金額なし、とみなす>>買い注文へ
+    # 最小単位以下であれば購入金額なし、とみなす>>買い注文へ
     unit_min = CurrencyPair.where(currency_pair: pair).first.unit_min
     has_wallet = Wallet.where("currency_type = ? and ? <= money", c_type, unit_min).any?
 
-    #買い
+
+    # 買い
     # 財布：未約定
     # ×：×　買い注文を実行
     if not has_wallet and not has_order then
@@ -208,7 +214,7 @@ class Trade
       if ave_list.first < ave_list.last
         return "bid"
       else
-        return "bid" #"相場安定待ち"
+        return "相場安定待ち"
       end
 
     end
