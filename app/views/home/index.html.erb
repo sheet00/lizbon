@@ -17,13 +17,17 @@ data = [['date','money']]
       <div class="btn-group btn-group-sm">
         <button class="btn btn-default">掛け率</button>
         <% @t_settings.each do |s| %>
-          <button class="btn btn-default"><%= s.trade_type %>:<%= s.percent.to_s %>%</button>
+          <a class="btn btn-default" href="<%= edit_trade_setting_path(s) %>">
+            <%= s.trade_type %>:<%= s.percent.to_s %>%
+          </a>
         <% end %>
       </div>
       <div class="btn-group btn-group-sm">
         <button class="btn btn-default">対象通貨</button>
         <% @targets.each do |t| %>
-          <button class="btn btn-default"><%= t.currency_type %></button>
+          <a class="btn btn-default" href="<%= targets_path %>">
+            <%= t.currency_type %>
+          </a>
         <% end %>
       </div>
     </div>
