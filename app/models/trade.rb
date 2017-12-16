@@ -45,7 +45,7 @@ class Trade
 
     #同期実行
     #購入判定前に同期することで、二重売買を防ぐ
-    #成約時の財布設定この時点で対応する
+    #成約時の財布増減もこの時点で対応
     sync_zaif
 
     #一回辺りの購入額計算
@@ -89,11 +89,11 @@ class Trade
   end
 
 
-  #未約定一覧から該当注文をキャンセルする
-  #お金戻し処理はsync_active_orderで
+  #　未約定一覧から該当注文をキャンセルする
+  #　時間短縮のため、存在しないオーダーを指定した場合はそのまま例外
+  # キャンセル実行時、サーバー上でキャンセルされていなかったときの対応
+  # オーダーが残っているため、次回実行時、再度キャンセル処理が実行される(確実にキャンセルされるまでループ)
   def order_cancel(order_id)
-    #時間短縮のため、存在しないオーダーを指定した場合はそのまま例外
-    #通常はbot起動時にsync_active_orderがされるため、存在しないオーダーを何回も消す処理にはならない
     order = ActiveOrder.where(order_id: order_id).first
     ActiveRecord::Base.transaction do
       result = retry_on_error do
@@ -101,16 +101,9 @@ class Trade
         @api.cancel(order_id, order.currency_pair)
       end
 
+      ActiveOrder.where(order_id: order_id).delete_all
+
       ApplicationController.helpers.log("[active_order][cancel][api result]",result)
-
-      #再度オーダー情報を取得し、zaif上から、削除できているか確認する
-      #ローカルのみデータが残っているので、ローカルDeleteが実行される
-      #財布戻し処理もsync_active_orderで実行
-      sleep 10
-      sync_active_order
-
-      #データがキャンセルされていなかった場合は例外発生>次回再度キャンセル処理トライ
-      raise ZaifCancelErrorException,"zaif server exists order_id #{order_id.to_s}" if ActiveOrder.where(order_id: order_id).any?
     end
   end
 
@@ -215,7 +208,7 @@ class Trade
       if ave_list.first < ave_list.last
         return "bid"
       else
-        return "相場安定待ち"
+        return "bid" #"相場安定待ち"
       end
 
     end
@@ -648,12 +641,12 @@ class Trade
   end
 
 
-  #Zaifサーバーの未成約一覧を同期する
-  #zaif:local
-  #×:×　両方なし：何もしない
-  #×:○　ローカルのみある：Delete
-  #○:×　ザイフのみある：Insert
-  #○:○　両方ある：何もしない
+  #　Zaifサーバーの未成約一覧を同期する
+  #　zaif:local
+  #　×:×　両方なし：何もしない
+  #　×:○　ローカルのみある：Delete
+  #　○:×　ザイフのみある：Insert
+  #　○:○　両方ある：何もしない
   def sync_active_order
 
     zaif_orders = []
@@ -662,47 +655,27 @@ class Trade
         @api.get_active_orders({currency_pair: t.currency_type + "_jpy" })
       end
 
-      #未約定にない通貨を指定したとき、{}が応答する
+      #　未約定にない通貨を指定したとき、{}が応答する
       orders.each{|o|
-        #botデータのみ対象
+        #　botデータのみ対象
         zaif_orders << o if o[1]["comment"] != ""
       }
     }
 
     ActiveRecord::Base.transaction do
 
-      #×:○　ローカルのみある：Delete
-      #ケースとしては、キャンセルされているのに、ローカルで残っているor未成約だったものが、成約済になっている
-      #同一TransactionID、複数回購入のケースもあるので、order_idでひくこと
+      #　×:○　ローカルのみある：Delete
+      #　ケースとしては、キャンセルされているのに、ローカルで残っているor未成約が成約済になっている
+      #　同一TransactionID、複数回購入のケースもあるので、order_idでひくこと
       ActiveOrder.all.each{|order|
         z_order = zaif_orders.find {|z| z[0] == order.order_id}
         unless z_order.present?
-
-          #取引履歴を更新
-          sync_trade_history
-
-          #取引履歴にもデータがなく、サーバー上からも消えている>>キャンセルとして返金処理
-          #取引履歴にある場合はsync_trade_historyで加算されている
-          unless TradeHistory.where(order_id: order.order_id).any?
-            #財布に戻す
-            #bid jpyを戻す
-            case order.action
-            when "bid"
-              #bid 円を戻す
-              Wallet.add_wallet("jpy", order.contract_price)
-            when "ask"
-              #ask 通貨を戻す
-              Wallet.add_wallet(order.currency_pair.gsub("_jpy",""), order.amount)
-            end
-          end
-
-          #データ削除
           ActiveOrder.where(order_id: order.order_id).delete_all
         end
       }
 
 
-      #○:×　ザイフのみある：Insert
+      #　○:×　ザイフのみある：Insert
       zaif_orders.each{|z|
         order_id = z[0]
         data = z[1]
@@ -742,7 +715,9 @@ class Trade
 
     end
 
-    ApplicationController.helpers.log("[sync_active_order][api result]",zaif_orders)
+    if zaif_orders.present?
+      ApplicationController.helpers.log("[sync_active_order][api result]",zaif_orders)
+    end
   end
 
 

@@ -137,8 +137,14 @@ data = [['date','money']]
               <tr class="<%=label_state(bot.trade_type)%>">
                 <td>
                   <%= bot.created_at.to_s %><br>
-                  <span class="label label-<%=label_state(bot.trade_type)%>"><%= bot.currency_type %></span>
-                  <%= t(bot.trade_type) %>
+                  <div class="row">
+                    <div class="col-md-2">
+                      <span class="label label-<%=label_state(bot.trade_type)%>"><%= bot.currency_type %></span>
+                    </div>
+                    <div class="col-md-10">
+                      <%= t(bot.trade_type) %>
+                    </div>
+                  </div>
                 </td>
               </tr>
               <% trade_type = bot.trade_type %>
@@ -176,7 +182,7 @@ data = [['date','money']]
                   <td><%= trade_history.transaction_id %></td>
                   <td><%= trade_history.currency_pair %></td>
                   <td><%= t(trade_history.your_action) %></td>
-                  <td><%= trade_history.price.round.to_s(:delimited)%></td>
+                  <td><%= trade_history.price.to_s(:delimited)%></td>
                   <td><%= trade_history.amount.to_s(:delimited)%></td>
                   <td><%= trade_history.contract_price.round.to_s(:delimited)%></td>
                   <td><%= trade_history.fee.to_s(:delimited)%></td>
