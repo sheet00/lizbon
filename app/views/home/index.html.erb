@@ -8,13 +8,21 @@ data = [['date','money']]
 
 %>
 <p id="notice"><%= notice %></p>
-<h1>りずぼんちゃん　時価総額(JPY):<%=get_market_capital.round.to_s(:delimited)%>円</h1>
-<h3></h3>
-<div class="pull-right hidden-xs">
-  <% @t_settings.each do |s| %>
-    <button type="button" class="btn btn-default"><%= s.trade_type %>:<%= s.percent.to_s %>%</button>
-  <% end %>
+<div class="bs-callout bs-callout-info">
+  <div class="btn-group">
+    <button class="btn btn-default">掛け率</button>
+    <% @t_settings.each do |s| %>
+      <button class="btn btn-default"><%= s.trade_type %>:<%= s.percent.to_s %>%</button>
+    <% end %>
+  </div>
+  <div class="btn-group">
+    <button class="btn btn-default">対象通貨</button>
+    <% @targets.each do |t| %>
+      <button class="btn btn-default"><%= t.currency_type %></button>
+    <% end %>
+  </div>
 </div>
+<h1>りずぼんちゃん　時価総額(JPY):<%=get_market_capital.round.to_s(:delimited)%>円</h1>
 <div>
   <%= link_to 'りずぼんちゃん実行', {:controller => "exec", :action => "index"}, { :class => "btn btn-primary" } %>
   <%= link_to "Zaif同期", sync_zaif_active_orders_path, {class: "btn btn-default"}%>
@@ -121,10 +129,9 @@ data = [['date','money']]
     </div>
   </div>
 </div>
-<!--Trade-->
 <div class="row">
-  <!--master-->
-  <div class="col-md-3">
+  <!--bots-->
+  <div class="col-md-3 hidden-xs">
     <div class="panel panel-default">
       <div class="panel-heading">実行結果</div>
       <div class="panel-body table-responsive">
@@ -154,7 +161,7 @@ data = [['date','money']]
       </div>
     </div>
   </div>
-  <!--log-->
+  <!--trade history-->
   <div class="col-md-9">
     <div class="panel panel-default">
       <div class="panel-heading">取引履歴</div>
@@ -164,7 +171,7 @@ data = [['date','money']]
             <thead>
               <tr>
                 <th>取引日</th>
-                <th>transaction_id</th>
+                <th class="hidden-xs">transaction_id</th>
                 <th>通貨</th>
                 <th>区分</th>
                 <th>単価</th>
@@ -179,7 +186,7 @@ data = [['date','money']]
               <% @trade_histories.each do |trade_history| %>
                 <tr>
                   <td><%= Time.at(trade_history.timestamp.to_i) %></td>
-                  <td><%= trade_history.transaction_id %></td>
+                  <td class="hidden-xs"><%= trade_history.transaction_id %></td>
                   <td><%= trade_history.currency_pair %></td>
                   <td><%= t(trade_history.your_action) %></td>
                   <td><%= trade_history.price.to_s(:delimited)%></td>
