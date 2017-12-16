@@ -168,7 +168,7 @@ class Trade
 
 
     Rails.logger.level = log_level
-    ApplicationController.helpers.log("[get_last_price][complete]")
+    ApplicationController.helpers.log("[get_last_price][end]")
   end
 
 
@@ -315,10 +315,10 @@ class Trade
 
 
 
-  #成約待ち時、キャンセルするかしないか判定
-  #キャンセル条件
-  #買い：買い注文をだしてN分買いが確定しない
-  #売り：損切りポイントに達した
+  # 成約待ち時、キャンセルするかしないか判定
+  # キャンセル条件
+  # 買い：買い注文をだしてN分買いが確定しない
+  # 売り：損切りポイントに達した
   def do_cancel?(c_type)
     order = ActiveOrder.where(currency_pair: "#{c_type}_jpy").first
 
@@ -511,10 +511,11 @@ class Trade
   #WalletにJPY追加
   #売却コインを引き落とし
   def sync_trade_history
+    ApplicationController.helpers.log("[sync_trade_history][start]")
 
     #今回取得できた取引成立レコード
     #bot取引のみ
-    trades = get_trade_history
+    trades = th_get_trade_history
 
     trades.each{|t|
 
@@ -611,41 +612,6 @@ class Trade
   end
 
 
-  #取引履歴を取得する
-  #return 取引成約データ
-  def get_trade_history
-    #トレード成約は毎分10以下を想定
-    #通貨指定なしの場合、下記のみ取得
-    #btc_jpy/mona_jpy/xem_jpy/xem_btc/mona_btc/
-    count = 10
-    trades = retry_on_error do
-      @api.get_my_trades({count: count})
-    end
-
-    #上記外のトレード取得
-    Target.where.not(currency_type: ["btc","mona","xem"]).each{|t|
-      c_pair = "#{t.currency_type}_jpy"
-      other_trades = retry_on_error do
-        @api.get_my_trades({count: count, currency_pair: c_pair})
-      end
-
-      #別通貨分を結合
-      trades.update(other_trades)
-    }
-
-    #コメントデータがないものは人間発注なので対象外
-    trades.select! {|k,v| v["comment"] != ""}
-
-    #入金履歴は取引時間が古い～新しいで記録される必要があるため、ソート必須
-    #第一キーdatetime, 第二キーorder_id
-    trades = trades.to_a.sort_by {|a|
-      [a[1]["datetime"], a[0]]
-    }
-
-    return trades
-  end
-
-
   #　Zaifサーバーの未成約一覧を同期する
   #　zaif:local
   #　×:×　両方なし：何もしない
@@ -653,6 +619,7 @@ class Trade
   #　○:×　ザイフのみある：Insert
   #　○:○　両方ある：何もしない
   def sync_active_order
+    ApplicationController.helpers.log("[sync_active_order][start]")
 
     zaif_orders = []
     Target.all.each{|t|
@@ -748,6 +715,65 @@ class Trade
 
     return all_trades
   end
+
+
+
+  #取引履歴を取得する
+  #return 取引成約データ
+  def th_get_trade_history
+    #トレード成約は毎分10以下を想定
+
+    #取得数
+    count = 10
+    trades = {}
+    all_th = []
+
+
+    #通貨指定なしの場合、下記のみ取得
+    #btc_jpy/mona_jpy/xem_jpy/xem_btc/mona_btc/
+    all_th << Thread.new {
+      t = retry_on_error do
+        @api.get_my_trades({count: count})
+      end
+
+      trades.update(t)
+    }
+
+    sleep 1
+
+
+    # #上記外のトレード取得
+    other_c_type = Target.where.not(currency_type: ["btc","mona","xem"]).pluck(:currency_type)
+    other_c_type.each{|c|
+
+      all_th << Thread.new {
+        t = retry_on_error do
+          @api.get_my_trades({count: count, currency_pair: "#{c}_jpy"})
+        end
+        trades.update(t)
+      }
+
+      sleep 1
+    }
+
+
+    ThreadsWait.all_waits(*all_th) {|th|
+      pp("[th_get_trade_history][end]", th.inspect)
+    }
+
+    #コメントデータがないものは人間発注なので対象外
+    trades.select! {|k,v| v["comment"] != ""}
+
+    #入金履歴は取引時間が古い～新しいで記録される必要があるため、ソート必須
+    #第一キーdatetime, 第二キーorder_id
+    trades = trades.to_a.sort_by {|a|
+      [a[1]["datetime"], a[0]]
+    }
+
+    return trades
+  end
+
+
 
 
   #tradeテストデータ返却
