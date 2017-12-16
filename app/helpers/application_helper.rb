@@ -48,18 +48,6 @@ module ApplicationHelper
       end
     }
 
-    #未約定
-    #買い：約定金額分
-    #売り：数量*単価
-    ActiveOrder.all.each{|o|
-      if o.action == "bid"
-        capital += o.contract_price
-      else
-        price = get_recent_price(o.currency_pair)
-        capital += o.amount * price
-      end
-    }
-
     return capital
   end
 
@@ -67,7 +55,7 @@ module ApplicationHelper
 
   #対象通貨の最新価格を求める
   def get_recent_price(c_pair)
-    ch = CurrencyHistory.where(currency_pair: c_pair).order("id desc").first
+    ch = CurrencyHistory.where(currency_pair: c_pair).order("timestamp desc").first
     return ch.present? ? ch.price : 0
   end
 

@@ -3,7 +3,7 @@ lizbon =
 			$ ->
 				#1min reload
 				timer = setInterval (->
-					location.reload()
+					#location.reload()
 					return
 				), 1000 * 60
 
