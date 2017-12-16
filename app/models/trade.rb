@@ -122,14 +122,11 @@ class Trade
   private
 
   #　今回実行時に1通貨で利用可能な金額の判定
-  #　全通貨のtrade_typeをカウントし計算
+  #　未約定の分は今後お金が入ってくる予定なので、除外する
   def get_once_buy_money
-    count = 0
-    Target.all.each{|t|
-      count += 1  if trade_type(t.currency_type) == "bid"
-    }
+    count = Target.where.not(currency_type: :jpy).count - ActiveOrder.all.count
 
-    return 0 if count == 0
+    return 0 if count <= 0
 
     #実財布ではなく、買い注文中の金額は除外して計算
     #お財布100円
