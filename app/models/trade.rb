@@ -621,17 +621,28 @@ class Trade
   def sync_active_order
     ApplicationController.helpers.log("[sync_active_order][start]")
 
+    all_th = []
     zaif_orders = []
-    Target.all.each{|t|
-      orders = retry_on_error do
-        @api.get_active_orders({currency_pair: t.currency_type + "_jpy" })
-      end
 
-      #　未約定にない通貨を指定したとき、{}が応答する
-      orders.each{|o|
-        #　botデータのみ対象
-        zaif_orders << o if o[1]["comment"] != ""
+    Target.where.not(currency_type: :jpy).each_with_index{|t,i|
+      all_th << Thread.new{
+        orders = retry_on_error do
+          # マルチスレッドの場合、一斉にAPIアクセスされるため、スレッドごとn秒間隔で実行
+          sleep i
+          @api.get_active_orders({currency_pair: t.currency_type + "_jpy" })
+        end
+
+        # 未約定にない通貨を指定したとき、{}が応答する
+        orders.each{|o|
+          # botデータのみ対象
+          zaif_orders << o if o[1]["comment"] != ""
+        }
+
       }
+    }
+
+    ThreadsWait.all_waits(*all_th) {|th|
+      pp("[sync_active_order][thread end]", th.inspect)
     }
 
     ActiveRecord::Base.transaction do
@@ -710,7 +721,7 @@ class Trade
     }
 
     ThreadsWait.all_waits(*all_th) {|th|
-      pp("[th_get_all_trades][end]", th.inspect)
+      pp("[th_get_all_trades][thread end]", th.inspect)
     }
 
     return all_trades
@@ -744,21 +755,20 @@ class Trade
 
     # #上記外のトレード取得
     other_c_type = Target.where.not(currency_type: ["btc","mona","xem"]).pluck(:currency_type)
-    other_c_type.each{|c|
+    other_c_type.each_with_index{|c,i|
 
       all_th << Thread.new {
         t = retry_on_error do
+          # マルチスレッドの場合、一斉にAPIアクセスされるため、スレッドごとn秒間隔で実行
+          sleep i
           @api.get_my_trades({count: count, currency_pair: "#{c}_jpy"})
         end
         trades.update(t)
       }
-
-      sleep 1
     }
 
-
     ThreadsWait.all_waits(*all_th) {|th|
-      pp("[th_get_trade_history][end]", th.inspect)
+      pp("[th_get_trade_history][thread end]", th.inspect)
     }
 
     #コメントデータがないものは人間発注なので対象外
