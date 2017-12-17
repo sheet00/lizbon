@@ -4,7 +4,7 @@ class CurrencyHistoriesController < ApplicationController
   # GET /currency_histories
   # GET /currency_histories.json
   def index
-    @currency_histories = CurrencyHistory.order("timestamp desc").take(100)
+    @currency_histories = CurrencyHistory.order("timestamp desc").take(500)
   end
 
   # GET /currency_histories/1

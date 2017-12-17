@@ -3,7 +3,7 @@
 <table class="table">
   <thead>
     <tr>
-      <th>created_at</th>
+      <th>trade_time</th>
       <th>Currency type</th>
       <th>Money</th>
       <th colspan="3"></th>
@@ -12,9 +12,9 @@
   <tbody>
     <% @wallet_histories.each do |wallet_history| %>
       <tr>
-        <td><%= wallet_history.created_at %></td>
+        <td><%= wallet_history.trade_time %></td>
         <td><%= wallet_history.currency_type %></td>
-        <td><%= wallet_history.money %></td>
+        <td><%= wallet_history.money.to_s(:delimited) %></td>
         <td><%= link_to 'Show', wallet_history %></td>
         <td><%= link_to 'Edit', edit_wallet_history_path(wallet_history) %></td>
         <td><%= link_to 'Destroy', wallet_history, method: :delete, data: { confirm: 'Are you sure?' } %></td>

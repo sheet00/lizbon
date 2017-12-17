@@ -73,6 +73,16 @@ class ActiveOrdersController < ApplicationController
   end
 
 
+
+  #zaifとデータ同期
+  def sync_zaif
+    t = Trade.new
+    t.sync_zaif
+
+    redirect_to root_url, notice: "zaifサーバーと同期しました。"+ DateTime.now.to_s
+  end
+
+
   private
   # Use callbacks to share common setup or constraints between actions.
   def set_active_order

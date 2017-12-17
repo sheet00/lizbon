@@ -12,16 +12,17 @@ CurrencyPair.create(
     {currency_pair: "bch_jpy", unit_min: 0.0001, unit_step: 0.0001, unit_digest: 4, currency_digest: -1},
     {currency_pair: "xem_jpy", unit_min: 0.1, unit_step: 0.1, unit_digest: 1, currency_digest: 4},
     {currency_pair: "mona_jpy", unit_min: 1, unit_step: 1, unit_digest: 0, currency_digest: 0},
+    {currency_pair: "eth_jpy", unit_min: 0.0001, unit_step: 0.0001, unit_digest: 4, currency_digest: -1},
   ]
 )
 
 Wallet.create({currency_type: "jpy", money: 1000, is_loscat: false})
 
-Target.create([{currency_type: "xem"},{currency_type: "btc"}])
+Target.create([{currency_type: "btc"},{currency_type: "bch"},{currency_type: "xem"},{currency_type: "eth"}])
 
 TradeSetting.create(
   [
-    {trade_type: :buy, percent: 1},
+    {trade_type: :buy, percent: 0.99},
     {trade_type: :sell_upper, percent: 1.05},
     {trade_type: :sell_lower, percent: 0.9}
   ]
