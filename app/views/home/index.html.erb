@@ -17,7 +17,7 @@ data = [['date','money']]
   </div>
   <div class="col-md-6">
     <div class="bs-callout bs-callout-info">
-      <div class="btn-group btn-group-sm">
+      <div class="btn-group btn-group-sm hidden-xs">
         <button class="btn btn-default">掛け率</button>
         <% @t_settings.each do |s| %>
           <a class="btn btn-default" href="<%= edit_trade_setting_path(s) %>">
@@ -36,10 +36,14 @@ data = [['date','money']]
     </div>
   </div>
 </div>
-<div>
-  <%= link_to 'りずぼんちゃん実行', {:controller => "exec", :action => "index"}, { :class => "btn btn-primary" } %>
-  <%= link_to "Zaif同期", sync_zaif_active_orders_path, {class: "btn btn-default"}%>
-</div>
+<nav class="navbar navbar-default">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <%= link_to 'りずぼんちゃん実行', {:controller => "exec", :action => "index"}, { :class => "btn btn-danger navbar-btn" } %>
+      <%= link_to "Zaif同期", sync_zaif_active_orders_path, {class: "btn btn-default navbar-btn"}%>
+    </div>
+  </div>
+</nav>
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 <script type="text/javascript">
   google.charts.load('current', {'packages':['corechart']});
@@ -110,9 +114,9 @@ data = [['date','money']]
           <table class="table">
             <thead>
               <tr>
-                <th></th>
+                <th class="hidden-xs"></th>
                 <th>取引日</th>
-                <th>transaction_id</th>
+                <th class="hidden-xs">transaction_id</th>
                 <th>通貨</th>
                 <th>区分</th>
                 <th>単価</th>
@@ -124,13 +128,16 @@ data = [['date','money']]
             <tbody>
               <% @active_orders.each do |active_order| %>
                 <tr>
-                  <td><%= link_to "キャンセル", cancel_active_order_path(active_order.order_id), {class: "btn btn-warning btn-xs"} %></td>
+                  <td class="hidden-xs">
+                    <%= link_to "キャンセル", cancel_active_order_path(active_order.order_id),
+                  {class: "btn btn-warning btn-xs", data: {confirm: "cancel?"} } %>
+                  </td>
                   <td><%= Time.at(active_order.timestamp.to_i) %></td>
-                  <td><%= active_order.transaction_id %></td>
+                  <td class="hidden-xs"><%= active_order.transaction_id %></td>
                   <td><%= active_order.currency_pair %></td>
                   <td><%= t(active_order.action) %></td>
-                  <td><%= active_order.price %></td>
-                  <td><%= active_order.amount %></td>
+                  <td><%= active_order.price.to_s(:delimited) %></td>
+                  <td><%= active_order.amount.to_s(:delimited) %></td>
                   <td><%= active_order.contract_price.round.to_s(:delimited) %></td>
                   <td><%= active_order.lower_limit %></td>
                 </tr>
