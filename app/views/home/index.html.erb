@@ -9,8 +9,11 @@ data = [['date','money']]
 %>
 <p id="notice"><%= notice %></p>
 <div class="row">
-  <div class="col-md-6">
-    <h1>りずぼんちゃん　時価総額(JPY):<%=get_market_capital.round.to_s(:delimited)%>円</h1>
+  <div class="col-md-3">
+    <h1>りずぼんちゃん</h1>
+  </div>
+  <div class="col-md-3">
+    <h2>時価総額 <%=get_market_capital.round.to_s(:delimited)%>円</h2>
   </div>
   <div class="col-md-6">
     <div class="bs-callout bs-callout-info">

@@ -1,0 +1,104 @@
+<%
+@page_title = "損益計算書"
+
+days = @th.map(&:day).uniq
+
+bids = @th.select{|a| a.your_action == "bid"}
+sells = @th.select{|a| a.your_action == "ask"}
+
+%>
+<div id="pl">
+  <h1><%=@page_title%></h1>
+  <div class="row">
+    <!--wallet-->
+    <div class="col-md-3">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          お財布
+        </div>
+        <div class="panel-body">
+          <table class="table txt-right">
+            <thead>
+              <tr>
+                <th>type</th>
+                <th>Money</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% @wallets.each do |wallet| %>
+                <tr>
+                  <td>
+                    <%= wallet.currency_type %>
+                    <% if wallet.is_loscat %>
+                      <span class="label label-danger">loscut</span>
+                    <% end %>
+                  </td>
+                  <td><%= wallet.money.to_s(:delimited) %></td>
+                </tr>
+              <% end %>
+              <tr>
+                <td><strong>時価総額</strong></td>
+                <td><strong><%=get_market_capital.round.to_s(:delimited)%>円</strong></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-9">
+      <div class="panel panel-default">
+        <div class="panel-heading">日別仕入売上</div>
+        <div class="table-responsive">
+          <table class="table table-hover txt-right">
+            <thead>
+              <tr>
+                <th>day</th>
+                <th>action</th>
+                <th>count</th>
+                <th>price</th>
+                <th>action</th>
+                <th>count</th>
+                <th>price</th>
+                <th>capital</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% days.each do |d| %>
+                <%
+              bid_row = bids.select{|a| a[:day] == d}.first
+              sell_row = sells.select{|a| a[:day] == d}.first
+              bid_price =  bid_row.present? ? bid_row.contract_price.round : 0
+              sell_price = sell_row.present? ? sell_row.contract_price.round : 0
+              %>
+                <tr>
+                  <td><%=d%></td>
+                  <td>仕入</td>
+                  <td><%= bid_row.present? ? bid_row.count : 0 %></td>
+                  <td><%= bid_price.to_s(:delimited) %></td>
+                  <td>売上</td>
+                  <td><%= sell_row.present? ? sell_row.count : 0 %></td>
+                  <td><%= sell_price.to_s(:delimited) %></td>
+                  <td><%= (sell_price - bid_price).to_s(:delimited) %></td>
+                </tr>
+              <% end %>
+              <tr class="active">
+                <%
+                total_bid = bids.map(&:contract_price).inject(:+)
+                total_sell = sells.map(&:contract_price).inject(:+)
+                %>
+                <td>total</td>
+                <td>仕入計</td>
+                <td><%= bids.map(&:count).inject(:+) %></td>
+                <td><%= total_bid.round.to_s(:delimited) %></td>
+                <td>売上計</td>
+                <td><%= sells.map(&:count).inject(:+) %></td>
+                <td><%= total_sell.round.to_s(:delimited) %></td>
+                <td><%= (total_sell - total_bid).round.to_s(:delimited) %></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
