@@ -4,7 +4,7 @@ class BotsController < ApplicationController
   # GET /bots
   # GET /bots.json
   def index
-    @bots = Bot.order("id DESC").take(1000)
+    @bots = Bot.order("id DESC").take(2000)
   end
 
   # GET /bots/1
