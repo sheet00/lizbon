@@ -128,7 +128,7 @@ data = [['date','money']]
                   <td><%= t(active_order.action) %></td>
                   <td><%= active_order.price %></td>
                   <td><%= active_order.amount %></td>
-                  <td><%= active_order.contract_price %></td>
+                  <td><%= active_order.contract_price.round.to_s(:delimited) %></td>
                   <td><%= active_order.lower_limit %></td>
                 </tr>
               <% end %>

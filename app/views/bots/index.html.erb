@@ -10,9 +10,9 @@
     </tr>
   </thead>
   <tbody>
-    <% trade_type = [] %>
+    <% trade_type = nil %>
     <% @bots.each do |bot| %>
-      <% next if trade_type.select{|t| t == "wait"}.count == 5 %>
+      <% next if trade_type == bot.trade_type and (trade_type == "wait") %>
       <tr class="<%=label_state(bot.trade_type)%>">
         <td>
           <span class="label label-<%=label_state(bot.trade_type)%>"><%= bot.currency_type %></span>
@@ -23,7 +23,7 @@
         <td><%= link_to 'Edit', edit_bot_path(bot) %></td>
         <td><%= link_to 'Destroy', bot, method: :delete, data: { confirm: 'Are you sure?' } %></td>
       </tr>
-      <% trade_type == "wait" ? trade_type << bot.trade_type : trade_type.clear %>
+      <% trade_type = bot.trade_type %>
     <% end %>
   </tbody>
 </table>

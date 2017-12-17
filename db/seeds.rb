@@ -18,7 +18,7 @@ CurrencyPair.create(
 
 Wallet.create({currency_type: "jpy", money: 1000, is_loscat: false})
 
-Target.create([{currency_type: "xem"},{currency_type: "btc"}])
+Target.create([{currency_type: "btc"},{currency_type: "bch"},{currency_type: "xem"},{currency_type: "eth"}])
 
 TradeSetting.create(
   [
