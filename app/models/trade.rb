@@ -338,6 +338,10 @@ class Trade
       #損切り売り中の場合はwait処理
       return false if Wallet.where(currency_type: c_type).first.is_loscat
 
+      #ロスカット判定
+      #最新単価がロスカット下限以下の場合、auto_cancel実行
+      #>>売りキャンセル=ロスカットフラグON
+      #>>次回実行時、ロスカットフラグで売りなら即売却
       history = CurrencyHistory.where(currency_pair: "#{c_type}_jpy").order("timestamp desc").first
       return history.price < order.lower_limit
     end
@@ -624,7 +628,7 @@ class Trade
     all_th = []
     zaif_orders = []
 
-    Target.where.not(currency_type: :jpy).each_with_index{|t,i|
+    Target.all.each_with_index{|t,i|
       all_th << Thread.new{
         orders = retry_on_error do
           # マルチスレッドの場合、一斉にAPIアクセスされるため、スレッドごとn秒間隔で実行
@@ -645,14 +649,17 @@ class Trade
       pp("[sync_active_order][thread end]", th.inspect)
     }
 
-    ActiveRecord::Base.transaction do
 
+    ActiveRecord::Base.transaction do
       #　×:○　ローカルのみある：Delete
       #　ケースとしては、キャンセルされているのに、ローカルで残っているor未成約が成約済になっている
       #　同一TransactionID、複数回購入のケースもあるので、order_idでひくこと
       ActiveOrder.all.each{|order|
-        z_order = zaif_orders.find {|z| z[0] == order.order_id}
-        unless z_order.present?
+        #json取得時なので、to_sでひくこと
+        has_zaif_order = zaif_orders.any? {|z| z[0] == order.order_id.to_s}
+
+        #zaif側にない=ローカルのみあるのであれば、データ削除
+        unless has_zaif_order
           ActiveOrder.where(order_id: order.order_id).delete_all
         end
       }
