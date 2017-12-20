@@ -1,4 +1,6 @@
 class TradeHistory < ApplicationRecord
+  has_one :bid_capital, class_name: 'Capital',foreign_key: 'bid_trade_id'
+  has_one :ask_capital, class_name: 'Capital',foreign_key: 'ask_trade_id'
 
   #日グループ売買実績
   def self.group_days

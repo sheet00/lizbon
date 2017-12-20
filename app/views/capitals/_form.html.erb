@@ -1,0 +1,35 @@
+<%= form_with(model: capital, local: true) do |form| %>
+  <% if capital.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(capital.errors.count, "error") %> prohibited this capital from being saved:</h2>
+      <ul>
+        <% capital.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+  <div class="field">
+    <%= form.label :trade_time %>
+    <%= form.text_field :trade_time, id: :capital_trade_time %>
+  </div>
+  <div class="field">
+    <%= form.label :currency_pair %>
+    <%= form.text_field :currency_pair, id: :capital_currency_pair %>
+  </div>
+  <div class="field">
+    <%= form.label :capital %>
+    <%= form.text_field :capital, id: :capital_capital %>
+  </div>
+  <div class="field">
+    <strong>bid_trade_id</strong>
+    <%= form.text_field :bid_trade_id %>
+  </div>
+  <div class="field">
+    <strong>ask_trade_id</strong>
+    <%= form.text_field :ask_trade_id %>
+  </div>
+  <div class="actions">
+    <%= form.submit %>
+  </div>
+<% end %>

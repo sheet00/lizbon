@@ -1,0 +1,37 @@
+<% @page_title = @capitals.pluck(:capital).inject(:+).round.to_s(:delimited) + "円" if @capitals.any? %>
+<p id="notice"><%= notice %></p>
+<h1>差益一覧：Capitals</h1>
+<div class="well well-sm">
+  <h3>累計:<%=@page_title%></h3>
+</div>
+<div class="table-responsive">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Trade time</th>
+        <th>Currency pair</th>
+        <th>Capital</th>
+        <th>trade_history</th>
+        <th colspan="3" class="hidden-xs"></th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @capitals.each do |capital| %>
+        <tr <%= 'class=bg-warning' if capital.capital < 0 %>>
+          <td><%= capital.trade_time %></td>
+          <td><%= capital.currency_pair %></td>
+          <td><%= capital.capital %></td>
+          <td>
+            <%= link_to "buy", trade_history_path(capital.bid_trade_id), {class: "btn btn-default btn-sm"} %>
+            <%= link_to "sell", trade_history_path(capital.ask_trade_id), {class: "btn btn-default btn-sm"} %>
+          </td>
+          <td class="hidden-xs"><%= link_to 'Show', capital %></td>
+          <td class="hidden-xs"><%= link_to 'Edit', edit_capital_path(capital) %></td>
+          <td class="hidden-xs"><%= link_to 'Destroy', capital, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>
+<br>
+<%= link_to 'New Capital', new_capital_path %>

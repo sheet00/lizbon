@@ -314,7 +314,6 @@ class Trade
 
 
 
-
   # 成約待ち時、キャンセルするかしないか判定
   # キャンセル条件
   # 買い：買い注文をだしてN分買いが確定しない
@@ -384,7 +383,6 @@ class Trade
 
     return round_price(c_type,price)
   end
-
 
 
   #購入数量算出
@@ -593,6 +591,10 @@ class Trade
           #c_type引き落とし
           Wallet.add_wallet(c_type, -1.0 * amount, trade_time)
 
+          #差益記録
+          #最新の購入単価を元に、売買差益を計算
+          Capital.cal_trade_capital(order_id)
+
           #loscat成立の場合は、フラグ解除
           wallet = Wallet.where(currency_type: c_type).first
           if wallet.present? and wallet.is_loscat
@@ -612,7 +614,6 @@ class Trade
       end
 
     } #trade.each
-
   end
 
 
@@ -735,14 +736,13 @@ class Trade
   end
 
 
-
   #取引履歴を取得する
   #return 取引成約データ
   def th_get_trade_history
     #トレード成約は毎分10以下を想定
 
     #取得数
-    count = 10
+    count = 1000
     trades = {}
     all_th = []
 
@@ -789,8 +789,6 @@ class Trade
 
     return trades
   end
-
-
 
 
   #tradeテストデータ返却

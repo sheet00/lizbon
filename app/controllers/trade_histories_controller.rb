@@ -4,7 +4,7 @@ class TradeHistoriesController < ApplicationController
   # GET /trade_histories
   # GET /trade_histories.json
   def index
-    @trade_histories = TradeHistory.order("timestamp desc").take(50)
+    @trade_histories = TradeHistory.order("timestamp desc").take(1000)
   end
 
   # GET /trade_histories/1

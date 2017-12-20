@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20171212124900) do
+ActiveRecord::Schema.define(version: 20171220021412) do
 
   create_table "active_orders", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.integer "order_id", null: false
@@ -32,6 +32,18 @@ ActiveRecord::Schema.define(version: 20171212124900) do
     t.string "trade_type", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "capitals", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.datetime "trade_time", null: false
+    t.string "currency_pair", null: false
+    t.decimal "capital", precision: 12, scale: 4, null: false
+    t.integer "bid_trade_id", null: false
+    t.integer "ask_trade_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["ask_trade_id"], name: "index_capitals_on_ask_trade_id"
+    t.index ["bid_trade_id"], name: "index_capitals_on_bid_trade_id"
   end
 
   create_table "currency_histories", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|

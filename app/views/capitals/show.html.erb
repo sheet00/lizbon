@@ -1,0 +1,15 @@
+<p id="notice"><%= notice %></p>
+<p>
+  <strong>Trade time:</strong>
+  <%= @capital.trade_time %>
+</p>
+<p>
+  <strong>Currency pair:</strong>
+  <%= @capital.currency_pair %>
+</p>
+<p>
+  <strong>Capital:</strong>
+  <%= @capital.capital %>
+</p>
+<%= link_to 'Edit', edit_capital_path(@capital) %> |
+<%= link_to 'Back', capitals_path %>

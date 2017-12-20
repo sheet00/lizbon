@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  resources :capitals
   resources :wallet_histories
   resources :trade_settings
 
