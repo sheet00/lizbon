@@ -107,5 +107,30 @@ select
 from
   lizbon_development.wallets; 
 
+--
+--
+truncate table lizbon_production.capitals; 
+
+insert 
+into lizbon_production.capitals( 
+  trade_time
+  , currency_pair
+  , capital
+  , bid_trade_id
+  , ask_trade_id
+  , created_at
+  , updated_at
+) 
+select
+  trade_time
+  , currency_pair
+  , capital
+  , bid_trade_id
+  , ask_trade_id
+  , created_at
+  , updated_at 
+from
+  lizbon_development.capitals; 
+
 
 

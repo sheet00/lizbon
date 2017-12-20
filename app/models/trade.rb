@@ -37,7 +37,7 @@ class Trade
 
 
 
-  #取引実行
+  # 取引実行
   def execute
     #価格取得
     get_last_price
@@ -166,8 +166,10 @@ class Trade
       }
     }
 
-
     Rails.logger.level = log_level
+
+    #古いログデータ削除
+    CurrencyHistory.delete_before_day
     ApplicationController.helpers.log("[get_last_price][end]")
   end
 
