@@ -4,7 +4,14 @@ class CurrencyHistoriesController < ApplicationController
   # GET /currency_histories
   # GET /currency_histories.json
   def index
-    @currency_histories = CurrencyHistory.order("timestamp desc").take(500)
+    #各通貨ごと取得する
+    @currency_histories = []
+    Target.all.each{|t|
+      @currency_histories.concat(
+        CurrencyHistory.where(currency_pair: "#{t.currency_type}_jpy").order("timestamp desc").take(10)
+      )
+    }
+
   end
 
   # GET /currency_histories/1
