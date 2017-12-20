@@ -34,3 +34,6 @@ doc/
 *secret*
 *secrets*
 database.yml
+
+/public/.htaccess
+/public/assets
