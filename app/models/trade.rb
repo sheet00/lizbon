@@ -742,7 +742,7 @@ class Trade
     #トレード成約は毎分10以下を想定
 
     #取得数
-    count = 1000
+    count = 10
     trades = {}
     all_th = []
 

@@ -29,4 +29,21 @@ class Capital < ApplicationRecord
       ask_trade_id: sell_row.id
     )
   end
+
+  #日別利益集計
+  def self.group_days
+    # select
+    #   date (trade_time) day
+    #   , sum(capital) as capital
+    # from
+    #   capitals
+    # group by
+    #   date (trade_time)
+
+    self.select("
+      date (trade_time) day
+      , sum(capital) as capital 
+      ")
+    .group("date (trade_time)")
+  end
 end

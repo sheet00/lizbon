@@ -1,9 +1,13 @@
-<% @page_title = get_market_capital.round.to_s(:delimited) + "円" %>
+<%
+total_capital = Capital.all.pluck(:capital).inject(:+)
+market_capital = get_market_capital
+@page_title = total_capital.round.to_s(:delimited) + "円"
+%>
 <%
 #json-data
-data = [['date','money']]
-@wallet_histories.reverse.each{|w|
-  data << [ w.trade_time.strftime("%H:%M"), w.money.round]
+data = [['date','capital']]
+@capitals.reverse.each{|c|
+  data << [ c.day.strftime("%m/%d"), c.capital.round]
 }
 
 %>
@@ -14,7 +18,8 @@ data = [['date','money']]
       <h1>りずぼんちゃん</h1>
     </div>
     <div class="col-md-3">
-      <h2>時価総額 <%=get_market_capital.round.to_s(:delimited)%>円</h2>
+      <h3>売買差益 <%=total_capital.round.to_s(:delimited)%>円</h3>
+      <h3>時価総額 <%=market_capital.round.to_s(:delimited)%>円</h3>
     </div>
     <div class="col-md-6">
       <div class="bs-callout bs-callout-info">
@@ -51,27 +56,33 @@ data = [['date','money']]
     google.charts.setOnLoadCallback(drawChart);
     
     function drawChart() {
-      var $w_data = JSON.parse($("#wallet_history").text());
+      var $c_data = JSON.parse($("#capitals").text());
     // 'false' means that the first row contains labels, not data.
-    var data = google.visualization.arrayToDataTable($w_data,false);
+    var data = google.visualization.arrayToDataTable($c_data,false);
     var options = {
       hAxis: {
-        title: '入出金履歴',
+        title: '売買差益',
         slantedTextAngle: 90
       },
-      width: 1500,
-      height: 500,
+      vAxis: {
+        minValue:0,
+        viewWindow: {
+          min: -1000
+        }
+      },
+      width: 1400,
+      height: 400,
       legend: { position: 'none'}
     };
     
-    var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
+    var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
     chart.draw(data, options);
       }
   </script>
-  <div id="wallet_history" class="hide">
+  <div id="capitals" class="hide">
     <%= data %>
   </div>
-  <div id="chart_div" class="hidden-xs <%= 'hide' if not @wallet_histories.any? %>"></div>
+  <div id="chart_div" class="hidden-xs <%= 'hide' if not @capitals.any? %>"></div>
   <div class="row">
     <!--wallet-->
     <div class="col-md-3">

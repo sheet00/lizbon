@@ -1,6 +1,6 @@
 <% @page_title = @capitals.pluck(:capital).inject(:+).round.to_s(:delimited) + "円" if @capitals.any? %>
 <p id="notice"><%= notice %></p>
-<h1>差益一覧：Capitals</h1>
+<h1>売買差益：Capitals</h1>
 <div class="well well-sm">
   <h3>累計:<%=@page_title%></h3>
 </div>
@@ -11,6 +11,8 @@
         <th>Trade time</th>
         <th>Currency pair</th>
         <th>Capital</th>
+        <th>bid_price</th>
+        <th>ask_price</th>
         <th>trade_history</th>
         <th colspan="3" class="hidden-xs"></th>
       </tr>
@@ -21,6 +23,8 @@
           <td><%= capital.trade_time %></td>
           <td><%= capital.currency_pair %></td>
           <td><%= capital.capital %></td>
+          <td><%= capital.bid.price * capital.ask.amount %></td>
+          <td><%= capital.ask.price * capital.ask.amount %></td>
           <td>
             <%= link_to "buy", trade_history_path(capital.bid_trade_id), {class: "btn btn-default btn-sm"} %>
             <%= link_to "sell", trade_history_path(capital.ask_trade_id), {class: "btn btn-default btn-sm"} %>

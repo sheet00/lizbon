@@ -4,7 +4,10 @@ class CapitalsController < ApplicationController
   # GET /capitals
   # GET /capitals.json
   def index
-    @capitals = Capital.order("trade_time desc").take(1000)
+    @capitals = Capital.order("trade_time desc")
+    .eager_load(:bid)
+    .eager_load(:ask)
+    .take(1000)
   end
 
   # GET /capitals/1
