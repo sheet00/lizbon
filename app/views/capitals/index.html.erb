@@ -22,9 +22,9 @@
         <tr <%= 'class=bg-warning' if capital.capital < 0 %>>
           <td><%= capital.trade_time %></td>
           <td><%= capital.currency_pair %></td>
-          <td><%= capital.capital %></td>
-          <td><%= capital.bid.price * capital.ask.amount %></td>
-          <td><%= capital.ask.price * capital.ask.amount %></td>
+          <td><%= capital.capital.round.to_s(:delimited) %></td>
+          <td><%= (capital.bid.price * capital.ask.amount).round.to_s(:delimited) %></td>
+          <td><%= (capital.ask.price * capital.ask.amount).round.to_s(:delimited) %></td>
           <td>
             <%= link_to "buy", trade_history_path(capital.bid_trade_id), {class: "btn btn-default btn-sm"} %>
             <%= link_to "sell", trade_history_path(capital.ask_trade_id), {class: "btn btn-default btn-sm"} %>
