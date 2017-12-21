@@ -121,7 +121,7 @@ class Trade
   #　今回実行時に1通貨で利用可能な金額の判定
   #　未約定の分は今後お金が入ってくる予定なので、除外する
   def get_once_buy_money
-    count = Target.where.not(currency_type: :jpy).count - ActiveOrder.all.count
+    count = Target.all.count - ActiveOrder.all.count
 
     return 0 if count <= 0
 
