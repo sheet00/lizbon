@@ -148,10 +148,13 @@ data = [['date','capital']]
                     <td class="hidden-xs"><%= active_order.transaction_id %></td>
                     <td><%= active_order.currency_pair %></td>
                     <td><%= t(active_order.action) %></td>
-                    <td><%= active_order.price.to_s(:delimited) %></td>
+                    <td>
+                      <div><%= active_order.price.to_s(:delimited) %></div>
+                      <div><small class="text-muted"><%= get_recent_price(active_order.currency_pair).to_s(:delimited) %></small></div>
+                    </td>
                     <td><%= active_order.amount.to_s(:delimited) %></td>
                     <td><%= active_order.contract_price.round.to_s(:delimited) %></td>
-                    <td><%= active_order.lower_limit %></td>
+                    <td><%= active_order.lower_limit.round.to_s(:delimited) %></td>
                   </tr>
                 <% end %>
               </tbody>
