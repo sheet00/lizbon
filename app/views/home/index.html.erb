@@ -154,7 +154,7 @@ data = [['date','capital']]
                     </td>
                     <td><%= active_order.amount.to_s(:delimited) %></td>
                     <td><%= active_order.contract_price.round.to_s(:delimited) %></td>
-                    <td><%= active_order.lower_limit.to_s(:delimited) %></td>
+                    <td><%= active_order.lower_limit.to_s(:delimited) if active_order.action == "ask" %></td>
                   </tr>
                 <% end %>
               </tbody>
