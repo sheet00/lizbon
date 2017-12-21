@@ -64,5 +64,16 @@ select
 from
   lizbon_production.bots; 
 
+--
+--
+truncate table lizbon_development.capitals; 
+
+insert 
+into lizbon_development.capitals 
+select
+  * 
+from
+  lizbon_production.capitals; 
+
 
 
