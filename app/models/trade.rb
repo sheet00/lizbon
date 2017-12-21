@@ -119,10 +119,14 @@ class Trade
   private
 
   #　今回実行時に1通貨で利用可能な金額の判定
-  #　未約定の分は今後お金が入ってくる予定なので、除外する
   def get_once_buy_money
-    count = Target.all.count - ActiveOrder.all.count
+    results = []
+    Target.all.each{|t|
+      results << trade_type(t.currency_type)
+    }
 
+    #waitかつaskでないもの=bid or 相場待ち
+    count = results.select{|a| a != "wait" and a != "ask"}.count
     return 0 if count <= 0
 
     #実財布ではなく、買い注文中の金額は除外して計算
