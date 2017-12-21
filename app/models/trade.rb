@@ -499,7 +499,7 @@ class Trade
     price_list = history.pluck(:price)
 
     #移動平均カウント
-    count = (history.count / 10).round
+    count = (history.count / 5).round
 
     ave_list = []
     price_list.each_cons(count).each{|p|
