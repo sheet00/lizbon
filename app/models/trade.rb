@@ -255,7 +255,7 @@ class Trade
 
       #ask
     else
-      #買った額からN% or loscut時は即売り
+      #買った額からN% or losscut時は即売り
       price = get_sell_price(c_type,"upper")
       lower_limit =  get_sell_price(c_type,"lower")
 
@@ -341,7 +341,7 @@ class Trade
     if order.action == "ask"
 
       #損切り売り中の場合はwait処理
-      return false if Wallet.where(currency_type: c_type).first.is_loscat
+      return false if Wallet.where(currency_type: c_type).first.is_losscut
 
       #ロスカット判定
       #最新単価がロスカット下限以下の場合、auto_cancel実行
@@ -370,7 +370,7 @@ class Trade
     if order.action == "ask"
       #los_catフラグ設定
       wallet = Wallet.where(currency_type: c_type).first
-      wallet.is_loscat = true
+      wallet.is_losscut = true
       wallet.save
 
       return "キャンセル：ロスカット"
@@ -403,7 +403,7 @@ class Trade
 
   #売価取得
   #trade_type: 上限upper or 下限lower
-  #loscut設定時は、即売り金額
+  #losscut設定時は、即売り金額
   def get_sell_price(c_type,trade_type = "upper")
     #1.直近の購入
     buy_timestamp = (Time.now - 10.minute).to_i
@@ -429,8 +429,8 @@ class Trade
     end
 
 
-    #loscut金額設定 6掛で即売り
-    if Wallet.where(currency_type: c_type).first.is_loscat
+    #losscut金額設定 6掛で即売り
+    if Wallet.where(currency_type: c_type).first.is_losscut
       if trade_type == "upper"
         price = history.price * 0.6
       else
@@ -601,10 +601,10 @@ class Trade
           #最新の購入単価を元に、売買差益を計算
           Capital.cal_trade_capital(order_id)
 
-          #loscat成立の場合は、フラグ解除
+          #losscut成立の場合は、フラグ解除
           wallet = Wallet.where(currency_type: c_type).first
-          if wallet.present? and wallet.is_loscat
-            wallet.is_loscat = false
+          if wallet.present? and wallet.is_losscut
+            wallet.is_losscut = false
             wallet.save
           end
         end

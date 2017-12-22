@@ -86,6 +86,6 @@ class WalletsController < ApplicationController
 
   # Never trust parameters from the scary internet, only allow the white list through.
   def wallet_params
-    params.require(:wallet).permit(:currency_type, :money, :is_loscat)
+    params.require(:wallet).permit(:currency_type, :money, :is_losscut)
   end
 end

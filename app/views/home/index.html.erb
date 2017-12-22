@@ -97,8 +97,8 @@ data = [['date','capital']]
                 <tr>
                   <td>
                     <%= wallet.currency_type %>
-                    <% if wallet.is_loscat %>
-                      <span class="label label-danger">loscut</span>
+                    <% if wallet.is_losscut %>
+                      <span class="label label-danger">losscut</span>
                     <% end %>
                   </td>
                   <td><%= wallet.money.to_s(:delimited) %></td>

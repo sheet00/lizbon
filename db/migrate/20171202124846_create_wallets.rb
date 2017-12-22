@@ -3,7 +3,7 @@ class CreateWallets < ActiveRecord::Migration[5.1]
     create_table :wallets do |t|
       t.string :currency_type, :null => false
       t.decimal :money, precision: 14, scale: 4, :null => false
-      t.boolean :is_loscat, :null => false
+      t.boolean :is_losscut, :null => false
 
       t.timestamps
     end

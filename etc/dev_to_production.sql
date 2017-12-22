@@ -94,14 +94,14 @@ insert
 into lizbon_production.wallets( 
   currency_type
   , money
-  , is_loscat
+  , is_losscut
   , created_at
   , updated_at
 ) 
 select
   currency_type
   , money
-  , is_loscat
+  , is_losscut
   , created_at
   , updated_at 
 from
