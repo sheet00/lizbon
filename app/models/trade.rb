@@ -490,7 +490,7 @@ class Trade
   #対象通貨の移動平均算出
   def get_average_list(c_type)
     history = CurrencyHistory.where(
-      "currency_pair = ? and ? < timestamp", "#{c_type}_jpy", (Time.now - 15.minute).to_i
+      "currency_pair = ? and ? < timestamp", "#{c_type}_jpy", (Time.now - 30.minute).to_i
     ).order(:timestamp)
 
     #履歴なし、少ない場合は空応答
