@@ -9,7 +9,7 @@ class Wallet < ApplicationRecord
 
     #お財布に該当通貨なし：Insert
     if wallet == nil
-      wallet = self.create(money: money, currency_type: c_type, is_loscat: false)
+      wallet = self.create(money: money, currency_type: c_type, is_losscut: false)
     else
       #お財布に該当通貨あり:Update
       #該当金額分を加算
