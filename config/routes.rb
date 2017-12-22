@@ -17,9 +17,15 @@ Rails.application.routes.draw do
   resources :currency_pairs
   resources :targets
   resources :bots
-  resources :trade_histories
   resources :trades
-  resources :currency_histories
+  resources :trade_histories
+
+  resources :currency_histories do
+    collection do
+      get :average
+    end
+  end
+
   resources :wallets do
     member do
       get :add
@@ -27,11 +33,11 @@ Rails.application.routes.draw do
     end
   end
 
-  root to: 'home#index'
 
   get 'exec/index'
   get 'home/index'
   get 'reports/pl'
 
+  root to: 'home#index'
   # For details on the DSL available within this file, see http://guides.rubyonrails.org/routing.html
 end

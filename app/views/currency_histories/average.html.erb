@@ -1,0 +1,67 @@
+<p id="notice"><%= notice %></p>
+<h1>コイン価格履歴-移動平均</h1>
+from: <%= DateTime.now - TradeSetting.where(trade_type: :average_list_min).first.value.to_i.minute %>
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<script type="text/javascript">
+  google.charts.load('current', {'packages':['corechart']});
+  google.charts.setOnLoadCallback(drawChart);
+  
+  
+  function drawChart() {
+  
+    <% @average.each do |k,v| %>
+  
+    var source = [];
+    <% v.each_with_index do |val,i| %>
+    source.push([<%=i%>,<%=val%>]);
+    <% end %>
+  
+    console.log(source);
+  
+    // 'false' means that the first row contains labels, not data.
+    var data = google.visualization.arrayToDataTable(source,true)
+  
+  
+    var options = {
+      hAxis: {
+        title: "<%=k%>",
+        slantedTextAngle: 90
+      },
+      height: 500,
+      legend: { position: 'none'}
+    };
+  
+    var chart = new google.visualization.LineChart(document.getElementById('chart_div_<%=k%>'));
+    chart.draw(data, options);
+  
+  
+    <% end %>
+  }
+</script>
+<% @average.each do |k,v| %>
+  <div id="chart_div_<%=k%>"></div>
+<% end %>
+<div class="row">
+  <% @average.each do |k,v| %>
+    <%
+  label_name =  v.first < v.last ? "success" : "danger"
+  
+  %>
+    <div class="col-md-2">
+      <div class="panel panel-default">
+        <div class="panel-heading"><span class="label label-<%=label_name%>"><%=k%></span></div>
+        <div class="panel-body">
+          <table class="table table-striped">
+            <tbody>
+              <% v.each do |val| %>
+                <tr>
+                  <td><%= val.round(4) %></td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  <% end %>
+</div>

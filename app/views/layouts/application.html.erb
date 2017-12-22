@@ -24,7 +24,7 @@
         </div>
         <div id="navbar" class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
-            <li><%= link_to 'コイン価格履歴', currency_histories_path %></li>
+            <li><%= link_to 'コイン価格平均', average_currency_histories_path %></li>
             <li><%= link_to '未約定注文一覧', active_orders_path %></li>
             <li><%= link_to '取引履歴', trade_histories_path %></li>
             <li><%= link_to 'PL', reports_pl_path %></li>
@@ -38,6 +38,7 @@
               </a>
               <ul class="dropdown-menu">
                 <li><%= link_to '入出金履歴', wallet_histories_path %></li>
+                <li><%= link_to 'コイン価格履歴', currency_histories_path %></li>
                 <li><%= link_to '対象通貨', targets_path %></li>
                 <li><%= link_to '通貨マスタ', currency_pairs_path %></li>
                 <li><%= link_to '設定マスタ', trade_settings_path %></li>
