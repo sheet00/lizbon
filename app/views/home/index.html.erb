@@ -27,7 +27,7 @@ data = [['date','capital']]
           <button class="btn btn-default">掛け率</button>
           <% @t_settings.each do |s| %>
             <a class="btn btn-default" href="<%= edit_trade_setting_path(s) %>">
-              <%= s.trade_type %>:<%= s.value.to_s %>%
+              <%= s.trade_type %>:<%= s.value.to_s %>
             </a>
           <% end %>
         </div>

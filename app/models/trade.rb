@@ -411,8 +411,8 @@ class Trade
 
   #購入単価取得
   def get_buy_price(c_type)
-    #直近の平均値を取得
-    price = get_average_list(c_type).last
+    #最新単価を元にして価格設定
+    price = CurrencyHistory.where(currency_pair: "#{c_type}_jpy").order("timestamp desc").first.price
 
     #マスタから掛け率を取得してpriceを設定する
     per = TradeSetting.where(trade_type: :buy).first.value
