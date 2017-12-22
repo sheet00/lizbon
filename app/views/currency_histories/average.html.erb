@@ -16,11 +16,8 @@ from: <%= DateTime.now - TradeSetting.where(trade_type: :average_list_min).first
     source.push([<%=i%>,<%=val%>]);
     <% end %>
   
-    console.log(source);
-  
     // 'false' means that the first row contains labels, not data.
     var data = google.visualization.arrayToDataTable(source,true)
-  
   
     var options = {
       hAxis: {
@@ -33,8 +30,6 @@ from: <%= DateTime.now - TradeSetting.where(trade_type: :average_list_min).first
   
     var chart = new google.visualization.LineChart(document.getElementById('chart_div_<%=k%>'));
     chart.draw(data, options);
-  
-  
     <% end %>
   }
 </script>
