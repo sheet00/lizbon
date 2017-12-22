@@ -115,6 +115,37 @@ class Trade
   end
 
 
+  #対象通貨の移動平均算出
+  def get_average_list(c_type)
+    #マスタ値分、遡ってデータを移動平均を算出
+    average_list_min = TradeSetting.where(trade_type: "average_list_min").first.value.to_i
+    from_date = Time.now - average_list_min.minute
+
+    history = CurrencyHistory.where(
+      "currency_pair = ? and ? < timestamp",
+      "#{c_type}_jpy",
+      from_date.to_i
+    ).order(:timestamp)
+
+    #履歴なし、少ない場合は空応答
+    return [] if not history.any? or history.count < 100
+
+    price_list = history.pluck(:price)
+
+    #移動平均カウント
+    count = (history.count * 0.9).round
+
+    ave_list = []
+    price_list.each_cons(count).each{|p|
+      move_average = p.inject(:+) / count.to_f
+      ave_list << move_average
+    }
+
+    return ave_list
+  end
+
+
+
   #------------------------------------------
   private
 
@@ -486,29 +517,6 @@ class Trade
     return val
   end
 
-
-  #対象通貨の移動平均算出
-  def get_average_list(c_type)
-    history = CurrencyHistory.where(
-      "currency_pair = ? and ? < timestamp", "#{c_type}_jpy", (Time.now - 30.minute).to_i
-    ).order(:timestamp)
-
-    #履歴なし、少ない場合は空応答
-    return [] if not history.any? or history.count < 10
-
-    price_list = history.pluck(:price)
-
-    #移動平均カウント
-    count = (history.count / 5).round
-
-    ave_list = []
-    price_list.each_cons(count).each{|p|
-      move_average = p.inject(:+) / count.to_f
-      ave_list << move_average
-    }
-
-    return ave_list
-  end
 
 
   #取引履歴一覧を同期する
