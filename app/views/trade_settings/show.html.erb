@@ -1,14 +1,11 @@
 <p id="notice"><%= notice %></p>
-
 <p>
   <strong>Trade type:</strong>
   <%= @trade_setting.trade_type %>
 </p>
-
 <p>
-  <strong>Percent:</strong>
-  <%= @trade_setting.percent %>
+  <strong>value:</strong>
+  <%= @trade_setting.value %>
 </p>
-
 <%= link_to 'Edit', edit_trade_setting_path(@trade_setting) %> |
 <%= link_to 'Back', trade_settings_path %>

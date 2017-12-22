@@ -384,7 +384,7 @@ class Trade
     price = get_average_list(c_type).last
 
     #マスタから掛け率を取得してpriceを設定する
-    per = TradeSetting.where(trade_type: :buy).first.percent
+    per = TradeSetting.where(trade_type: :buy).first.value
     price = price * per
 
     return round_price(c_type,price)
@@ -417,7 +417,7 @@ class Trade
       history = CurrencyHistory.where(currency_pair: "#{c_type}_jpy").order("timestamp desc").first
     end
 
-    per = TradeSetting.where(trade_type: "sell_#{trade_type}").first.percent
+    per = TradeSetting.where(trade_type: "sell_#{trade_type}").first.value
 
     #直近購入があれば、直近の購入額 * N%
     #直近購入なければ、相場価格から * N%

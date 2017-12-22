@@ -22,8 +22,8 @@ Target.create([{currency_type: "btc"},{currency_type: "bch"},{currency_type: "xe
 
 TradeSetting.create(
   [
-    {trade_type: :buy, percent: 0.99},
-    {trade_type: :sell_upper, percent: 1.05},
-    {trade_type: :sell_lower, percent: 0.9}
+    {trade_type: :buy, value: 0.99},
+    {trade_type: :sell_upper, value: 1.05},
+    {trade_type: :sell_lower, value: 0.9}
   ]
 )

@@ -2,25 +2,21 @@
   <% if trade_setting.errors.any? %>
     <div id="error_explanation">
       <h2><%= pluralize(trade_setting.errors.count, "error") %> prohibited this trade_setting from being saved:</h2>
-
       <ul>
-      <% trade_setting.errors.full_messages.each do |message| %>
-        <li><%= message %></li>
-      <% end %>
+        <% trade_setting.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
       </ul>
     </div>
   <% end %>
-
   <div class="field">
     <%= form.label :trade_type %>
     <%= form.text_field :trade_type, id: :trade_setting_trade_type %>
   </div>
-
   <div class="field">
-    <%= form.label :percent %>
-    <%= form.text_field :percent, id: :trade_setting_percent %>
+    <%= form.label :value %>
+    <%= form.text_field :value, id: :trade_setting_percent %>
   </div>
-
   <div class="actions">
     <%= form.submit %>
   </div>

@@ -91,7 +91,7 @@ ActiveRecord::Schema.define(version: 20171220021412) do
 
   create_table "trade_settings", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.string "trade_type", null: false
-    t.decimal "percent", precision: 6, scale: 4, null: false
+    t.decimal "value", precision: 10, scale: 4, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
