@@ -76,4 +76,16 @@ from
   lizbon_production.capitals; 
 
 
+--
+--
+truncate table lizbon_development.trade_settings; 
+
+insert 
+into lizbon_development.trade_settings 
+select
+  * 
+from
+  lizbon_production.trade_settings; 
+
+
 

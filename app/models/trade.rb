@@ -13,7 +13,7 @@ class Trade
     )
 
     #テストの場合はAPI未実行
-    @is_test = true
+    @is_test = false
   end
 
   #例外処理 戻り値はブロック実行結果
@@ -286,8 +286,9 @@ class Trade
       #ask
     else
       #買った額からN% or losscut時は即売り
-      price = get_sell_price(c_type,"upper")
-      lower_limit =  get_sell_price(c_type,"lower")
+      prices = get_sell_prices(c_type)
+      price = prices[:upper]
+      lower_limit = prices[:lower]
 
       #買った分全て
       amount = get_sell_amount(c_type)
@@ -433,10 +434,11 @@ class Trade
   end
 
 
-  #売価取得
-  #trade_type: 上限upper or 下限lower
-  #losscut設定時は、即売り金額
-  def get_sell_price(c_type,trade_type = "upper")
+  # 売価取得
+  # upper/lower両方を取得する
+  # return r[:upper] r[:lower] r[:last_price]
+  # losscut設定時は、即売り金額
+  def get_sell_prices(c_type)
     #直近の購入
     buy_timestamp = (Time.now - 30.minute).to_i
     t_history = TradeHistory.where("currency_pair = ? and ? < timestamp","#{c_type}_jpy", buy_timestamp).order("timestamp desc").first
@@ -451,16 +453,20 @@ class Trade
       end
     end
 
-    per = TradeSetting.where(trade_type: "sell_#{trade_type}").first.value
-    price = price * per
+    upper_price = price * TradeSetting.where(trade_type: "sell_upper").first.value
+    lower_price = price * TradeSetting.where(trade_type: "sell_lower").first.value
 
     #losscut金額設定 6掛で即売り
     #注文: JPY注文価格の値は現在価格の5分の1〜5倍の範囲で注文してください
     if Wallet.where(currency_type: c_type).first.is_losscut
-      price = (price * 0.6) if trade_type == "upper"
+      upper_price = upper_price * 0.6
+      lower_price = upper_price
     end
 
-    return round_price(c_type,price)
+    upper_price = round_price(c_type,upper_price)
+    lower_price = round_price(c_type,lower_price)
+
+    return {:upper => upper_price, :lower => lower_price, last_price: price}
   end
 
   #数量取得
@@ -687,7 +693,7 @@ class Trade
           #売りの場合、損切り価格を再設定
           if action == "ask"
             c_type = currency_pair.gsub("_jpy","")
-            lower_limit = get_sell_price(c_type,"lower")
+            lower_limit = get_sell_prices(c_type)[:lower]
           end
 
           ActiveOrder.create(
