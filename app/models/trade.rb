@@ -1,4 +1,6 @@
 require 'thwait'
+require 'bigdecimal'
+require 'bigdecimal/util'
 
 #取引管理クラス
 class Trade
@@ -541,7 +543,10 @@ class Trade
       price = data["price"]
       #feeの設定がない通貨ある
       fee = data["fee"].presence || 0
-      fee_amount = data["fee_amount"]
+      #fee_amountは小数6桁まであるので、4桁切り上げ処理
+      #0.0002175BCH >> 0.0003
+      #75.78396JPY >> 75.7840
+      fee_amount = data["fee_amount"].to_d.ceil(4).to_f
       contract_price = (amount * price).round(4)
       your_action = data["your_action"]
       timestamp = data["timestamp"]
