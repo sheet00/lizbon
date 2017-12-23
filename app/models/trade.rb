@@ -13,7 +13,7 @@ class Trade
     )
 
     #テストの場合はAPI未実行
-    @is_test = false
+    @is_test = true
   end
 
   #例外処理 戻り値はブロック実行結果
@@ -45,7 +45,7 @@ class Trade
     #同期実行
     #購入判定前に同期することで、二重売買を防ぐ
     #成約時の財布増減もこの時点で対応
-    sync_zaif
+    #sync_zaif
 
     #一回辺りの購入額計算
     #処理ごと通貨ステータスが切り替わるため、ループ前に用意
@@ -55,7 +55,6 @@ class Trade
     Target.all.each{|t|
       #トランザクションは通貨処理単位
       ActiveRecord::Base.transaction do
-
         c_type = t.currency_type
 
         #取引判定
@@ -411,8 +410,10 @@ class Trade
 
   #購入単価取得
   def get_buy_price(c_type)
-    #最新単価を元にして価格設定
-    price = CurrencyHistory.where(currency_pair: "#{c_type}_jpy").order("timestamp desc").first.price
+    price =
+    retry_on_error do
+      @api.get_last_price(c_type)
+    end
 
     #マスタから掛け率を取得してpriceを設定する
     per = TradeSetting.where(trade_type: :buy).first.value
@@ -436,37 +437,27 @@ class Trade
   #trade_type: 上限upper or 下限lower
   #losscut設定時は、即売り金額
   def get_sell_price(c_type,trade_type = "upper")
-    #1.直近の購入
-    buy_timestamp = (Time.now - 10.minute).to_i
-    trade = TradeHistory.where("currency_pair = ? and ? < timestamp","#{c_type}_jpy", buy_timestamp).order("timestamp desc").first
+    #直近の購入
+    buy_timestamp = (Time.now - 30.minute).to_i
+    t_history = TradeHistory.where("currency_pair = ? and ? < timestamp","#{c_type}_jpy", buy_timestamp).order("timestamp desc").first
 
-    #2.直前の相場金額
-    history = CurrencyHistory.where(currency_pair: "#{c_type}_jpy").order("timestamp desc").first
-    #価格履歴もない場合は取得する
-    unless history.present?
-      get_last_price
-      history = CurrencyHistory.where(currency_pair: "#{c_type}_jpy").order("timestamp desc").first
+    price =
+    if t_history.present?
+      t_history.price
+    else
+      #直近購入履歴がなければ、最新単価
+      retry_on_error do
+        @api.get_last_price(c_type)
+      end
     end
 
     per = TradeSetting.where(trade_type: "sell_#{trade_type}").first.value
-
-    #直近購入があれば、直近の購入額 * N%
-    #直近購入なければ、相場価格から * N%
-    price =
-    if trade.present?
-      trade.price * per
-    else
-      history.price * per
-    end
-
+    price = price * per
 
     #losscut金額設定 6掛で即売り
+    #注文: JPY注文価格の値は現在価格の5分の1〜5倍の範囲で注文してください
     if Wallet.where(currency_type: c_type).first.is_losscut
-      if trade_type == "upper"
-        price = history.price * 0.6
-      else
-        price = history.price
-      end
+      price = (price * 0.6) if trade_type == "upper"
     end
 
     return round_price(c_type,price)
