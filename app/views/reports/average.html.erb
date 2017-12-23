@@ -39,7 +39,9 @@ from: <%= DateTime.now - TradeSetting.where(trade_type: :average_list_min).first
 <div class="row">
   <% @average.each do |k,v| %>
     <%
-  label_name =  v.first < v.last ? "success" : "danger"
+  if v.any?
+    label_name =  v.first < v.last ? "success" : "danger"
+  end
   
   %>
     <div class="col-md-2">
@@ -50,7 +52,7 @@ from: <%= DateTime.now - TradeSetting.where(trade_type: :average_list_min).first
             <tbody>
               <% v.each do |val| %>
                 <tr>
-                  <td><%= val.round(4) %></td>
+                  <td><%= val.round(4).to_s(:delimited) %></td>
                 </tr>
               <% end %>
             </tbody>

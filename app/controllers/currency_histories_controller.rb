@@ -68,17 +68,6 @@ class CurrencyHistoriesController < ApplicationController
     end
   end
 
-
-  def average
-    trade = Trade.new
-
-    @average = {}
-    Target.all.each{|t|
-      @average[t.currency_type] = trade.get_average_list(t.currency_type)
-    }
-  end
-
-
   private
   # Use callbacks to share common setup or constraints between actions.
   def set_currency_history
