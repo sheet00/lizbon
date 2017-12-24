@@ -20,5 +20,8 @@ module Lizbon
     config.logger = Logger.new(config.paths["log"].first)
     config.logger.formatter = Logger::Formatter.new
     config.logger.formatter.datetime_format = "%Y-%m-%d %H:%M:%S"
+
+    #active job
+    config.active_job.queue_adapter = :delayed_job
   end
 end

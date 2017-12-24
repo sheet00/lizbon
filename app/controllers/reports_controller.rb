@@ -15,4 +15,8 @@ class ReportsController < ApplicationController
     }
   end
 
+  def jobs
+    @jobs = DelayedJob.all.order("run_at desc")
+  end
+
 end

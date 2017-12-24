@@ -1,0 +1,30 @@
+<%
+@page_title = "jobs"
+%>
+<h1><%=@page_title%></h1>
+<table class="table">
+  <thead>
+    <th>priority</th>
+    <th>attempts</th>
+    <th>last_error</th>
+    <th>run_at</th>
+    <th>locked_at</th>
+    <th>failed_at</th>
+    <th>locked_by</th>
+    <th>queue</th>
+  </thead>
+  <tbody>
+    <% @jobs.each do |j| %>
+      <tr>
+        <td><%=j.priority%></td>
+        <td><%=j.attempts%></td>
+        <td><%=j.last_error.slice(0,100) if j.last_error.present? %></td>
+        <td><%=j.run_at%></td>
+        <td><%=j.locked_at%></td>
+        <td><%=j.failed_at%></td>
+        <td><%=j.locked_by%></td>
+        <td><%=j.queue%></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
