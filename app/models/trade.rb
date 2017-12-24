@@ -442,8 +442,8 @@ class Trade
   # losscut設定時は、即売り金額
   def get_sell_prices(c_type)
     #直近の購入
-    buy_timestamp = (Time.now - 30.minute).to_i
-    t_history = TradeHistory.where("currency_pair = ? and ? < timestamp","#{c_type}_jpy", buy_timestamp).order("timestamp desc").first
+    buy_datetime = Time.now - 30.minute
+    t_history = TradeHistory.where("currency_pair = ? and ? < timestamp","#{c_type}_jpy", buy_datetime.to_i).order("timestamp desc").first
 
     price =
     if t_history.present?
@@ -456,9 +456,17 @@ class Trade
     end
 
     upper_price = price * TradeSetting.where(trade_type: "sell_upper").first.value
-    lower_price = price * TradeSetting.where(trade_type: "sell_lower").first.value
 
-    #losscut金額設定 6掛で即売り
+
+    #ロスカット下限価格設定
+    #直近N時間の最低価格をセット
+    lower_datetime = Time.now - TradeSetting.where(trade_type: "sell_lower_min").first.value.minute
+    lower_price = CurrencyHistory
+    .where("currency_pair = ? and ? < timestamp", "#{c_type}_jpy", lower_datetime.to_i)
+    .minimum(:price)
+
+
+    #ロスカット決定時の金額設定 6掛で即売り
     #注文: JPY注文価格の値は現在価格の5分の1〜5倍の範囲で注文してください
     if Wallet.where(currency_type: c_type).first.is_losscut
       upper_price = upper_price * 0.6
@@ -470,6 +478,7 @@ class Trade
 
     return {:upper => upper_price, :lower => lower_price, last_price: price}
   end
+
 
   #数量取得
   #財布の中全て

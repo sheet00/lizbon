@@ -3,6 +3,10 @@ class ExecController < ApplicationController
 
     TradeJob.perform_later
 
+    #test
+    # trade = Trade.new
+    # trade.execute()
+
     respond_to do |format|
       format.html { redirect_to root_path, notice: 'ActiveJobに登録しました。 ' + DateTime.now.to_s}
     end
