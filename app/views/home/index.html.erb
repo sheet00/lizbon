@@ -138,7 +138,7 @@ data = [['date','capital']]
               if active_order.action == "ask"
                  #パーセンテージ算出
                  progress_per = (recent_price - active_order.lower_limit) / (active_order.price - active_order.lower_limit)
-                 progress_per = progress_per.round(2) * 100
+                 progress_per = progress_per.round(3) * 100
                  label_state = 50 <= progress_per ? "success" : "danger"
                end
                %>
