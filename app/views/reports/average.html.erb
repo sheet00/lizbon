@@ -1,5 +1,8 @@
+<%
+@page_title = "コイン価格履歴-移動平均"
+%>
 <p id="notice"><%= notice %></p>
-<h1>コイン価格履歴-移動平均</h1>
+<h1><%=@page_title%></h1>
 from: <%= DateTime.now - TradeSetting.where(trade_type: :average_list_min).first.value.to_i.minute %>
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 <script type="text/javascript">
