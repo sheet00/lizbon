@@ -139,9 +139,17 @@ data = [['date','capital']]
                  #パーセンテージ算出
                  progress_per = (recent_price - active_order.lower_limit) / (active_order.price - active_order.lower_limit)
                  progress_per = progress_per.round(3) * 100
-                 label_state = 50 <= progress_per ? "success" : "danger"
-               end
-               %>
+                 label_state =
+                 case progress_per
+                 when 0..33
+                  "danger"
+                when 34..66
+                  "info"
+                else
+                  "success"
+                end
+              end
+              %>
                   <tr>
                     <td class="hidden-xs">
                       <%= link_to "キャンセル", cancel_active_order_path(active_order.order_id),
