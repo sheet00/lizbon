@@ -252,7 +252,7 @@ class Trade
       buy_criterion = ave_list.first * rate_of_up
 
       ApplicationController.helpers.log(
-        "[trade_type][buy_criterion/ave_list.last]",
+        "[trade_type][#{c_type}][buy_criterion/ave_list.last]",
         [buy_criterion.round(4),ave_list.last.round(4)]
       )
 
