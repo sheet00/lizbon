@@ -129,7 +129,7 @@ class Trade
     ).order(:timestamp)
 
     #履歴なし、少ない場合は空応答
-    return [] if not history.any? or history.count < 100
+    return [] if not history.present? or history.count < 100
 
     price_list = history.pluck(:price)
 
@@ -205,7 +205,7 @@ class Trade
     Rails.logger.level = log_level
 
     #古いログデータ削除
-    CurrencyHistory.delete_before_day
+    CurrencyHistory.delete_before_log
     ApplicationController.helpers.log("[get_last_price][end]")
   end
 
