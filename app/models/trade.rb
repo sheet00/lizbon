@@ -247,11 +247,19 @@ class Trade
       return "bid" if @is_test
 
 
-      #移動平均が上がっているなら買う
-      if ave_list.first < ave_list.last
+      #移動平均が指定上昇率以上になったら購入
+      rate_of_up = TradeSetting.where(trade_type: :buy_rate_of_up).first.value
+      buy_criterion = ave_list.first * rate_of_up
+
+      ApplicationController.helpers.log(
+        "[trade_type][buy_criterion/ave_list.last]",
+        [buy_criterion.round(4),ave_list.last.round(4)]
+      )
+
+      if buy_criterion < ave_list.last
         return "bid"
       else
-        return "相場安定待ち"
+        return "相場上昇待ち"
       end
 
     end

@@ -1,9 +1,11 @@
 <%
 @page_title = "コイン価格履歴-移動平均"
+rate_of_up = TradeSetting.where(trade_type: :buy_rate_of_up).first.value
 %>
 <p id="notice"><%= notice %></p>
 <h1><%=@page_title%></h1>
-from: <%= DateTime.now - TradeSetting.where(trade_type: :average_list_min).first.value.to_i.minute %>
+<p>from: <%= DateTime.now - TradeSetting.where(trade_type: :average_list_min).first.value.to_i.minute %></p>
+<p>購入上昇率:<%= rate_of_up %></p>
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 <script type="text/javascript">
   google.charts.load('current', {'packages':['corechart']});
@@ -37,31 +39,30 @@ from: <%= DateTime.now - TradeSetting.where(trade_type: :average_list_min).first
   }
 </script>
 <% @average.each do |k,v| %>
-  <div id="chart_div_<%=k%>"></div>
-<% end %>
-<div class="row">
-  <% @average.each do |k,v| %>
-    <%
-  if v.any?
-    label_name =  v.first < v.last ? "success" : "danger"
-  end
-  
-  %>
-    <div class="col-md-2">
-      <div class="panel panel-default">
-        <div class="panel-heading"><span class="label label-<%=label_name%>"><%=k%></span></div>
-        <div class="panel-body">
-          <table class="table table-striped">
-            <tbody>
-              <% v.each do |val| %>
-                <tr>
-                  <td><%= val.round(4).to_s(:delimited) %></td>
-                </tr>
-              <% end %>
-            </tbody>
-          </table>
+  <%
+if v.any?
+  label_name =  v.first < v.last ? "success" : "danger"
+end
+%>
+  <div class="panel panel-default">
+    <div class="panel-heading"><span class="label label-<%=label_name%>"><%=k%></span></div>
+    <div class="panel-body">
+      <div class="row">
+        <div class="col-md-3">
+          <ul class="list-group">
+            <li class="list-group-item">
+              <%= v.first.round(4).to_s(:delimited) %>
+              ~
+              <%= v.last.round(4).to_s(:delimited) %>
+            </li>
+            <li class="list-group-item">上昇率:<%= (v.last / v.first).round(5) %></li>
+            <li class="list-group-item">購入実行:<%=(v.first * rate_of_up).round(4).to_s(:delimited)%></li>
+          </ul>
+        </div>
+        <div class="col-md-9">
+          <div id="chart_div_<%=k%>"></div>
         </div>
       </div>
     </div>
-  <% end %>
-</div>
+  </div>
+<% end %>
