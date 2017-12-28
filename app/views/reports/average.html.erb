@@ -15,6 +15,7 @@ rate_of_up = TradeSetting.where(trade_type: :buy_rate_of_up).first.value
   function drawChart() {
   
     <% @average.each do |k,v| %>
+    <% next unless v.any? %>
   
     var source = [];
     <% v.each_with_index do |val,i| %>
@@ -39,11 +40,8 @@ rate_of_up = TradeSetting.where(trade_type: :buy_rate_of_up).first.value
   }
 </script>
 <% @average.each do |k,v| %>
-  <%
-if v.any?
-  label_name =  v.first < v.last ? "success" : "danger"
-end
-%>
+  <% next unless v.any? %>
+  <% label_name =  v.first < v.last ? "success" : "danger"%>
   <div class="panel panel-default">
     <div class="panel-heading"><span class="label label-<%=label_name%>"><%=k%></span></div>
     <div class="panel-body">
