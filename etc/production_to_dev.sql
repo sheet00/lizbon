@@ -75,7 +75,6 @@ select
 from
   lizbon_production.capitals; 
 
-
 --
 --
 truncate table lizbon_development.trade_settings; 
@@ -86,6 +85,17 @@ select
   * 
 from
   lizbon_production.trade_settings; 
+
+--
+--
+truncate table lizbon_development.currency_averages; 
+
+insert 
+into lizbon_development.currency_averages 
+select
+  * 
+from
+  lizbon_production.currency_averages; 
 
 
 

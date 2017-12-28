@@ -4,8 +4,7 @@ class CurrencyAverage < ApplicationRecord
   def self.create_average
     ApplicationController.helpers.log("[create_average][start]")
     ActiveRecord::Base.transaction do
-
-      connection.execute "TRUNCATE TABLE currency_averages;"
+      CurrencyAverage.delete_all
 
       log_level = Rails.logger.level
       Rails.logger.level = Logger::INFO
