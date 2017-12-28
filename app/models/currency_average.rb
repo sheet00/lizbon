@@ -3,21 +3,23 @@ class CurrencyAverage < ApplicationRecord
   # currency_historyから移動平均を生成する
   def self.create_average
     ApplicationController.helpers.log("[create_average][start]")
+    ActiveRecord::Base.transaction do
 
-    connection.execute "TRUNCATE TABLE currency_averages;"
+      connection.execute "TRUNCATE TABLE currency_averages;"
 
-    log_level = Rails.logger.level
-    Rails.logger.level = Logger::INFO
+      log_level = Rails.logger.level
+      Rails.logger.level = Logger::INFO
 
-    Target.all.each{|t|
-      ave_list = get_average_list(t.currency_type)
-      ave_list.each{|r|
-        CurrencyAverage.create(currency_pair: "#{t.currency_type}_jpy", price: r.round(4))
+      Target.all.each{|t|
+        ave_list = get_average_list(t.currency_type)
+        ave_list.each{|r|
+          CurrencyAverage.create(currency_pair: "#{t.currency_type}_jpy", price: r.round(4))
+        }
       }
-    }
 
-    Rails.logger.level = log_level
+      Rails.logger.level = log_level
 
+    end
     ApplicationController.helpers.log("[create_average][end]")
   end
 
