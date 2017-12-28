@@ -44,6 +44,9 @@ class Trade
     #価格取得
     get_last_price
 
+    #取得データを元に移動平均データ生成
+    CurrencyAverage.create_average
+
     #同期実行
     #購入判定前に同期することで、二重売買を防ぐ
     #成約時の財布増減もこの時点で対応
@@ -113,36 +116,6 @@ class Trade
   def sync_zaif
     sync_trade_history
     sync_active_order
-  end
-
-
-  #対象通貨の移動平均算出
-  def get_average_list(c_type)
-    #マスタ値分、遡ってデータを移動平均を算出
-    average_list_min = TradeSetting.where(trade_type: "average_list_min").first.value.to_i
-    from_date = Time.now - average_list_min.minute
-
-    history = CurrencyHistory.where(
-      "currency_pair = ? and ? < timestamp",
-      "#{c_type}_jpy",
-      from_date.to_i
-    ).order(:timestamp)
-
-    #履歴なし、少ない場合は空応答
-    return [] if not history.present? or history.count < 100
-
-    price_list = history.pluck(:price)
-
-    #移動平均カウント
-    count = (history.count * 0.98).round
-
-    ave_list = []
-    price_list.each_cons(count).each{|p|
-      move_average = p.inject(:+) / count.to_f
-      ave_list << move_average
-    }
-
-    return ave_list
   end
 
 
@@ -239,7 +212,7 @@ class Trade
     # ×：×　買い注文を実行
     if not has_wallet and not has_order then
       #相場確認
-      ave_list = get_average_list(c_type)
+      ave_list = CurrencyAverage.where(currency_pair: pair).pluck(:price)
       return "最新データ取得待ち" unless ave_list.any?
 
 
@@ -252,8 +225,11 @@ class Trade
       buy_criterion = ave_list.first * rate_of_up
 
       ApplicationController.helpers.log(
-        "[trade_type][#{c_type}][buy_criterion/ave_list.last]",
-        [buy_criterion.round(4),ave_list.last.round(4)]
+        "[trade_type][#{c_type}]",
+        [
+          ["buy_criterion",buy_criterion.round(4)],
+          ["ave_list.last",ave_list.last.round(4)]
+        ]
       )
 
       if buy_criterion < ave_list.last
