@@ -1,10 +1,14 @@
 <%
 @page_title = "コイン価格履歴-移動平均"
 rate_of_up = TradeSetting.where(trade_type: :buy_rate_of_up).first.value
+if CurrencyAverage.any?
+  from = CurrencyAverage.minimum(:created_at) - TradeSetting.where(trade_type: :average_list_min).first.value.to_i.minute
+  to = CurrencyAverage.minimum(:created_at)
+end
 %>
 <p id="notice"><%= notice %></p>
 <h1><%=@page_title%></h1>
-<p>from: <%= DateTime.now - TradeSetting.where(trade_type: :average_list_min).first.value.to_i.minute %></p>
+<p>集計期間: <%= from %> ~ <%= to %></p>
 <p>購入上昇率:<%= rate_of_up %></p>
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 <script type="text/javascript">
