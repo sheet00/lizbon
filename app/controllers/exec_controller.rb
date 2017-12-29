@@ -1,6 +1,9 @@
 class ExecController < ApplicationController
   def index
+    #価格取得
+    GetLastPriceJob.perform_later
 
+    #トレード実行
     TradeJob.perform_later
 
     #test

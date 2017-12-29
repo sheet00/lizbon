@@ -41,12 +41,6 @@ class Trade
 
   # 取引実行
   def execute
-    #価格取得
-    get_last_price
-
-    #取得データを元に移動平均データ生成
-    CurrencyAverage.create_average
-
     #同期実行
     #購入判定前に同期することで、二重売買を防ぐ
     #成約時の財布増減もこの時点で対応
@@ -142,44 +136,6 @@ class Trade
     ex_wallet = Wallet.exclude_order.select{|w| w.currency_type == "jpy"}.first
     buy_money = ex_wallet.money / count
     return buy_money.floor
-  end
-
-
-  #板から価格一覧取得
-  def get_last_price
-    ApplicationController.helpers.log("[get_last_price][start]")
-
-    #マルチスレッドで取得
-    all_trades = th_get_all_trades
-
-
-    #量が多いため、ログ出力なし
-    log_level = Rails.logger.level
-    Rails.logger.level = Logger::INFO
-
-    Target.all.each{|t|
-      h_max_timestamp = CurrencyHistory.where(currency_pair: "#{t.currency_type}_jpy").maximum(:timestamp)
-      recent_timestamp = h_max_timestamp.present? ? h_max_timestamp.to_i : (Time.now - 1.days).to_i
-
-      #テーブルに含まれていないデータ全て取得
-      new_trades = all_trades.select{|t| recent_timestamp < t["date"]}
-
-      new_trades.each{|t|
-        CurrencyHistory.create([
-                                 currency_pair: t["currency_pair"],
-                                 trade_type: t["trade_type"],
-                                 price: t["price"],
-                                 amount: t["amount"],
-                                 timestamp: t["date"]
-        ])
-      }
-    }
-
-    Rails.logger.level = log_level
-
-    #古いログデータ削除
-    CurrencyHistory.delete_before_log
-    ApplicationController.helpers.log("[get_last_price][end]")
   end
 
 
@@ -718,30 +674,6 @@ class Trade
     if zaif_orders.present?
       ApplicationController.helpers.log("[sync_active_order][api result]",zaif_orders)
     end
-  end
-
-
-  # マルチスレッドで全通貨価格取得
-  def th_get_all_trades
-
-    all_trades = []
-    all_th = []
-    Target.all.each {|t|
-      all_th << Thread.new {
-        trades =
-        retry_on_error do
-          @api.get_trades(t.currency_type)
-        end
-
-        all_trades.concat(trades)
-      }
-    }
-
-    ThreadsWait.all_waits(*all_th) {|th|
-      pp("[th_get_all_trades][thread end]", th.inspect)
-    }
-
-    return all_trades
   end
 
 

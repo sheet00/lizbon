@@ -6,17 +6,12 @@ class CurrencyAverage < ApplicationRecord
     ActiveRecord::Base.transaction do
       CurrencyAverage.delete_all
 
-      log_level = Rails.logger.level
-      Rails.logger.level = Logger::INFO
-
       Target.all.each{|t|
         ave_list = get_average_list(t.currency_type)
         ave_list.each{|r|
           CurrencyAverage.create(currency_pair: "#{t.currency_type}_jpy", price: r.round(4))
         }
       }
-
-      Rails.logger.level = log_level
 
     end
     ApplicationController.helpers.log("[create_average][end]")
