@@ -95,7 +95,8 @@ class GetPrice
           @api.get_trades(t.currency_type)
         end
 
-        all_trades.concat(trades)
+        #取得は最新～旧となるため、古い順で並び替え
+        all_trades.concat(trades.reverse)
       }
     }
 
