@@ -36,8 +36,24 @@ class CurrencyAverage < ApplicationRecord
 
     price_list = history.pluck(:price)
 
+    #x万件以上ある場合、処理速度アップのため、N件単位で平均算出する
+    #n=2　2件に1つ採用 n=3 3件に1つ採用
+    #btcで1時間1万程度
+    n = 2
+    if 20000 < price_list.count
+      result = []
+      price_list.each_with_index{|val,i|
+        #余剰が0なら計算対象
+        result << val if i % n == 0
+      }
+
+      price_list = result
+      ApplicationController.helpers.log("[create_average][1/#{n}]")
+    end
+
+
     #移動平均カウント
-    count = (history.count * 0.98).round
+    count = (price_list.count * 0.98).round
 
     ave_list = []
     price_list.each_cons(count).each{|p|
