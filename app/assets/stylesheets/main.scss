@@ -17,7 +17,7 @@
 }
 
 .txt-right{
-	text-align: right;
+  text-align: right;
 }
 
 //pl
@@ -27,4 +27,12 @@
 
 .dev-back-ground{
   background-color: #fffaf0;
+}
+
+a.list-group-item-sm {
+  padding: 5px;
+}
+
+.no-warp{
+  white-space: nowrap;
 }

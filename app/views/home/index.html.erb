@@ -14,7 +14,7 @@ data = [['date','capital']]
 <div id="home">
   <p id="notice"><%= notice %></p>
   <div class="row">
-    <div class="col-md-3">
+    <div class="col-md-3 hidden-xs">
       <h1>りずぼんちゃん</h1>
     </div>
     <div class="col-md-3">
@@ -22,9 +22,9 @@ data = [['date','capital']]
       <h3>時価総額 <%=market_capital.round.to_s(:delimited)%>円</h3>
     </div>
     <div class="col-md-6">
-      <div class="bs-callout bs-callout-info">
-        <div class="btn-group btn-group-sm hidden-xs">
-          <button class="btn btn-default">掛け率</button>
+      <div class="bs-callout bs-callout-info hidden-xs">
+        <div class="btn-group btn-group-sm">
+          <button class="btn btn-default">設定</button>
           <% @t_settings.each do |s| %>
             <a class="btn btn-default" href="<%= edit_trade_setting_path(s) %>">
               <%= s.trade_type %>:<%= s.value.to_s %>
@@ -40,6 +40,16 @@ data = [['date','capital']]
           <% end %>
         </div>
       </div>
+    </div>
+    <!--mobile-->
+    <div class="col-md-6 visible-xs-inline-block">
+      <ul class="list-group">
+        <% @t_settings.each do |s| %>
+          <a class="list-group-item list-group-item-sm" href="<%= edit_trade_setting_path(s) %>">
+            <%= s.trade_type %>[<%= s.value.to_s %>]
+          </a>
+        <% end %>
+      </ul>
     </div>
   </div>
   <nav class="navbar navbar-default">
@@ -116,152 +126,218 @@ data = [['date','capital']]
           未約定注文一覧
         </div>
         <div class="panel-body">
-          <div class="table-responsive">
-            <table class="table">
-              <thead>
+          <table class="table hidden-xs">
+            <thead>
+              <tr>
+                <th></th>
+                <th>取引日</th>
+                <th>transaction_id</th>
+                <th>通貨</th>
+                <th>区分</th>
+                <th>単価</th>
+                <th>数量</th>
+                <th>約定金額</th>
+                <th>売り下限</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% @active_orders.each do |active_order| %>
                 <tr>
-                  <th class="hidden-xs"></th>
-                  <th>取引日</th>
-                  <th class="hidden-xs">transaction_id</th>
-                  <th>通貨</th>
-                  <th>区分</th>
-                  <th>単価</th>
-                  <th>数量</th>
-                  <th>約定金額</th>
-                  <th>売り下限</th>
+                  <td>
+                    <%= link_to "キャンセル", cancel_active_order_path(active_order.order_id),
+                {class: "btn btn-warning btn-xs", data: {confirm: "cancel?"} } %>
+                  </td>
+                  <td><%= Time.at(active_order.timestamp.to_i) %></td>
+                  <td><%= active_order.transaction_id %></td>
+                  <td><%= active_order.currency_pair %></td>
+                  <td><%= t(active_order.action) %></td>
+                  <td>
+                    <div><%= active_order.price.to_s(:delimited) %></div>
+                    <div><small class="text-muted"><%= get_recent_price(active_order.currency_pair).to_s(:delimited) %></small></div>
+                  </td>
+                  <td><%= active_order.amount.to_s(:delimited) %></td>
+                  <td><%= active_order.contract_price.round.to_s(:delimited) %></td>
+                  <td><%= active_order.lower_limit.to_s(:delimited) if active_order.action == "ask" %></td>
+                </tr>
+                <% if active_order.action == "ask" %>
+                  <tr>
+                    <td colspan="9">
+                      <%= render :partial => "progress_bar", :locals => { order: active_order } %>
+                    </td>
+                  </tr>
+                <% end %>
+              <% end %>
+            </tbody>
+          </table>
+          <!--mobile-->
+          <div class="visible-xs-block">
+            <% @active_orders.each do |o| %>
+              <table class="table no-warp">
+                <thead style="width:100%;">
+                  <tr class="active">
+                    <th colspan="2"><%=Time.at(o.timestamp.to_i)%></th>
+                  </tr>
+                </thead>
+                <tr>
+                  <td><%= t(o.action) %></td>
+                  <td><%= o.currency_pair %></td>
+                </tr>
+                <tr>
+                  <td>単価</td>
+                  <td>
+                    <%= o.price.to_s(:delimited) %><br>
+                    <small class="text-muted"><%= get_recent_price(o.currency_pair).to_s(:delimited) %></small>
+                  </td>
+                </tr>
+                <tr>
+                  <td>数量</td>
+                  <td><%= o.amount.to_s(:delimited) %></td>
+                </tr>
+                <tr>
+                  <td>約定</td>
+                  <td><%= o.contract_price.round.to_s(:delimited) %></td>
+                </tr>
+                <tr>
+                  <td>下限</td>
+                  <td><%= o.lower_limit.to_s(:delimited) if o.action == "ask" %></td>
+                </tr>
+                <% if o.action == "ask" %>
+                  <tr>
+                    <td colspan="2"><%= render :partial => "progress_bar", :locals => {order: o} %></td>
+                  </tr>
+                <% end %>
+              </tr>
+            </table>
+          <% end %>
+        </div>
+      </div>
+      <!--panel end-->
+    </div>
+  </div>
+</div>
+<div class="row">
+  <!--bots-->
+  <div class="col-md-3 hidden-xs">
+    <div class="panel panel-default">
+      <div class="panel-heading">実行結果</div>
+      <div class="panel-body">
+        <table class="table">
+          <tbody>
+            <% trade_type = nil %>
+            <% @bots.each do |bot| %>
+              <% #連続待ちの場合は無視 %>
+              <% next if trade_type == bot.trade_type and (trade_type == "wait" or trade_type == "相場上昇待ち" ) %>
+              <tr class="<%=label_state(bot.trade_type)%>">
+                <td>
+                  <%= bot.created_at.to_s %><br>
+                  <div class="row">
+                    <div class="col-md-2">
+                      <span class="label label-<%=label_state(bot.trade_type)%>"><%= bot.currency_type %></span>
+                    </div>
+                    <div class="col-md-10">
+                      <%= t(bot.trade_type) %>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+              <% trade_type = bot.trade_type %>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <!--trade history-->
+  <div class="col-md-9">
+    <div class="panel panel-default">
+      <div class="panel-heading">取引履歴</div>
+      <div class="panel-body">
+        <table class="table hidden-xs">
+          <thead>
+            <tr>
+              <th>取引日</th>
+              <th>transaction_id</th>
+              <th>通貨</th>
+              <th>区分</th>
+              <th>単価</th>
+              <th>数量</th>
+              <th>約定代金</th>
+              <th>利益</th>
+              <th>手数料</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @trade_histories.each do |trade_history| %>
+              <%
+            if trade_history.your_action == "ask" and trade_history.ask_capital.present?
+              capital = trade_history.ask_capital.capital.round
+              label = 0 < capital  ? "bg-info" : "bg-danger"
+            end 
+            %>
+              <tr class="<%= label %>">
+                <td><%= Time.at(trade_history.timestamp.to_i) %></td>
+                <td class="hidden-xs"><%= trade_history.transaction_id %></td>
+                <td><%= trade_history.currency_pair %></td>
+                <td><%= t(trade_history.your_action) %></td>
+                <td><%= trade_history.price.to_s(:delimited)%></td>
+                <td><%= trade_history.amount.to_s(:delimited)%></td>
+                <td><%= trade_history.contract_price.round.to_s(:delimited)%></td>
+                <td class="txt-right"><%= capital.to_s(:delimited) if capital.present? %></td>
+                <td><%= trade_history.fee_amount.to_s(:delimited)%></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+        <!--mobile-->
+        <div class="visible-xs-block">
+          <% @trade_histories.each do |t| %>
+            <table class="table no-warp">
+              <thead>
+                <tr class="active">
+                  <th colspan="2"><%= Time.at(t.timestamp.to_i) %></th>
                 </tr>
               </thead>
               <tbody>
-                <% @active_orders.each do |active_order| %>
-                  <%
-              recent_price = get_recent_price(active_order.currency_pair) 
-              if active_order.action == "ask"
-                 #パーセンテージ算出
-                 progress_per = (recent_price - active_order.lower_limit) / (active_order.price - active_order.lower_limit)
-                 progress_per = progress_per.round(3) * 100
-                 label_state =
-                 case progress_per
-                 when 0..33
-                  "danger"
-                when 34..66
-                  "info"
-                else
-                  "success"
-                end
-              end
+                <%
+              if t.your_action == "ask" and t.ask_capital.present?
+                capital = t.ask_capital.capital.round
+                label = 0 < capital  ? "bg-info" : "bg-danger"
+              end 
               %>
-                  <tr>
-                    <td class="hidden-xs">
-                      <%= link_to "キャンセル", cancel_active_order_path(active_order.order_id),
-                  {class: "btn btn-warning btn-xs", data: {confirm: "cancel?"} } %>
-                    </td>
-                    <td><%= Time.at(active_order.timestamp.to_i) %></td>
-                    <td class="hidden-xs"><%= active_order.transaction_id %></td>
-                    <td><%= active_order.currency_pair %></td>
-                    <td><%= t(active_order.action) %></td>
-                    <td>
-                      <div><%= active_order.price.to_s(:delimited) %></div>
-                      <div><small class="text-muted"><%= recent_price.to_s(:delimited) %></small></div>
-                    </td>
-                    <td><%= active_order.amount.to_s(:delimited) %></td>
-                    <td><%= active_order.contract_price.round.to_s(:delimited) %></td>
-                    <td><%= active_order.lower_limit.to_s(:delimited) if active_order.action == "ask" %></td>
-                  </tr>
-                  <% if active_order.action == "ask" %>
-                    <tr>
-                      <td colspan="9">
-                        <div class="progress">
-                          <div class="progress-bar progress-bar-<%=label_state%> progress-bar-striped" style="width: <%=progress_per%>%">
-                            <%=progress_per.to_s%>%
-                          </div>
-                        </td>
-                      </tr>
-                    <% end %>
-                  <% end %>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="row">
-      <!--bots-->
-      <div class="col-md-3 hidden-xs">
-        <div class="panel panel-default">
-          <div class="panel-heading">実行結果</div>
-          <div class="panel-body table-responsive">
-            <table class="table">
-              <tbody>
-                <% trade_type = nil %>
-                <% @bots.each do |bot| %>
-                  <% #連続待ちの場合は無視 %>
-                  <% next if trade_type == bot.trade_type and (trade_type == "wait" or trade_type == "相場安定待ち" ) %>
-                  <tr class="<%=label_state(bot.trade_type)%>">
-                    <td>
-                      <%= bot.created_at.to_s %><br>
-                      <div class="row">
-                        <div class="col-md-2">
-                          <span class="label label-<%=label_state(bot.trade_type)%>"><%= bot.currency_type %></span>
-                        </div>
-                        <div class="col-md-10">
-                          <%= t(bot.trade_type) %>
-                        </div>
-                      </div>
-                    </td>
-                  </tr>
-                  <% trade_type = bot.trade_type %>
-                <% end %>
+                <tr>
+                  <td><%= t(t.your_action) %></td>
+                  <td><%= t.currency_pair %></td>
+                </tr>
+                <tr>
+                  <td>単価</td>
+                  <td><%= t.price.to_s(:delimited)%></td>
+                </tr>
+                <tr>
+                  <td>数量</td>
+                  <td><%= t.amount.to_s(:delimited)%></td>
+                </tr>
+                <tr>
+                  <td>約定金額</td>
+                  <td><%= t.contract_price.round.to_s(:delimited)%></td>
+                </tr>
+                <tr class="<%= label %>">
+                  <td>利益</td>
+                  <td><%= capital.to_s(:delimited) if capital.present? %></td>
+                </tr>
+                <tr>
+                  <td>手数料</td>
+                  <td><%= t.fee_amount.to_s(:delimited)%></td>
+                </tr>
+                <tr class="<%= label %>">
+                </tr>
               </tbody>
             </table>
-          </div>
-        </div>
-      </div>
-      <!--trade history-->
-      <div class="col-md-9">
-        <div class="panel panel-default">
-          <div class="panel-heading">取引履歴</div>
-          <div class="panel-body">
-            <div class="table-responsive">
-              <table class="table">
-                <thead>
-                  <tr>
-                    <th>取引日</th>
-                    <th class="hidden-xs">transaction_id</th>
-                    <th>通貨</th>
-                    <th>区分</th>
-                    <th>単価</th>
-                    <th>数量</th>
-                    <th>約定代金</th>
-                    <th>利益</th>
-                    <th>手数料</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <% @trade_histories.each do |trade_history| %>
-                    <%
-                if trade_history.your_action == "ask" and trade_history.ask_capital.present?
-                  capital = trade_history.ask_capital.capital.round
-                  label = 0 < capital  ? "bg-info" : "bg-danger"
-                end 
-                %>
-                    <tr class="<%= label %>">
-                      <td><%= Time.at(trade_history.timestamp.to_i) %></td>
-                      <td class="hidden-xs"><%= trade_history.transaction_id %></td>
-                      <td><%= trade_history.currency_pair %></td>
-                      <td><%= t(trade_history.your_action) %></td>
-                      <td><%= trade_history.price.to_s(:delimited)%></td>
-                      <td><%= trade_history.amount.to_s(:delimited)%></td>
-                      <td><%= trade_history.contract_price.round.to_s(:delimited)%></td>
-                      <td class="txt-right"><%= capital.to_s(:delimited) if capital.present? %></td>
-                      <td><%= trade_history.fee_amount.to_s(:delimited)%></td>
-                    </tr>
-                  <% end %>
-                </tbody>
-              </table>
-            </div>
-          </div>
+          <% end %>
         </div>
       </div>
     </div>
   </div>
+  <!--row-->
+</div>
+<!--home-->
+</div>

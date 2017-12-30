@@ -47,18 +47,18 @@ sells = @th.select{|a| a.your_action == "ask"}
     </div>
     <div class="col-md-9">
       <div class="panel panel-default">
-        <div class="panel-heading">日別仕入売上(買い～売り1セットの利益計算)</div>
+        <div class="panel-heading">日別仕入売上</div>
         <div class="table-responsive">
           <table class="table table-hover txt-right">
             <thead>
               <tr>
                 <th>day</th>
-                <th>action</th>
-                <th>count</th>
-                <th>price</th>
-                <th>action</th>
-                <th>count</th>
-                <th>price</th>
+                <th class="hidden-xs">action</th>
+                <th class="hidden-xs">count</th>
+                <th class="hidden-xs">price</th>
+                <th class="hidden-xs">action</th>
+                <th class="hidden-xs">count</th>
+                <th class="hidden-xs">price</th>
                 <th>capital</th>
               </tr>
             </thead>
@@ -77,12 +77,12 @@ sells = @th.select{|a| a.your_action == "ask"}
               %>
                 <tr>
                   <td><%=d%></td>
-                  <td>仕入</td>
-                  <td><%= bid_row.present? ? bid_row.count : 0 %></td>
-                  <td><%= bid_price.to_s(:delimited) %></td>
-                  <td>売上</td>
-                  <td><%= sell_row.present? ? sell_row.count : 0 %></td>
-                  <td><%= sell_price.to_s(:delimited) %></td>
+                  <td class="hidden-xs">仕入</td>
+                  <td class="hidden-xs"><%= bid_row.present? ? bid_row.count : 0 %></td>
+                  <td class="hidden-xs"><%= bid_price.to_s(:delimited) %></td>
+                  <td class="hidden-xs">売上</td>
+                  <td class="hidden-xs"><%= sell_row.present? ? sell_row.count : 0 %></td>
+                  <td class="hidden-xs"><%= sell_price.to_s(:delimited) %></td>
                   <td><%= capital.to_s(:delimited) %></td>
                 </tr>
               <% end %>
@@ -92,12 +92,12 @@ sells = @th.select{|a| a.your_action == "ask"}
                 total_sell = sells.map(&:contract_price).inject(:+)
                 %>
                 <td>total</td>
-                <td>仕入計</td>
-                <td><%= bids.map(&:count).inject(:+) %></td>
-                <td><%= total_bid.round.to_s(:delimited) %></td>
-                <td>売上計</td>
-                <td><%= sells.map(&:count).inject(:+) %></td>
-                <td><%= total_sell.round.to_s(:delimited) %></td>
+                <td class="hidden-xs">仕入計</td>
+                <td class="hidden-xs"><%= bids.map(&:count).inject(:+) %></td>
+                <td class="hidden-xs"><%= total_bid.round.to_s(:delimited) %></td>
+                <td class="hidden-xs">売上計</td>
+                <td class="hidden-xs"><%= sells.map(&:count).inject(:+) %></td>
+                <td class="hidden-xs"><%= total_sell.round.to_s(:delimited) %></td>
                 <td><%= @capitals.map(&:capital).inject(:+).round.to_s(:delimited) %></td>
               </tr>
             </tbody>

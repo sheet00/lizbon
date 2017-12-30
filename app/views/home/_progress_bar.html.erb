@@ -1,0 +1,23 @@
+<%
+recent_price = get_recent_price(order.currency_pair)
+if order.action == "ask"
+  
+  #パーセンテージ算出
+  progress_per = (recent_price - order.lower_limit) / (order.price - order.lower_limit)
+  progress_per = progress_per.round(3) * 100
+  label_state =
+  case progress_per
+  when 0..33
+   "danger"
+ when 34..66
+   "info"
+ else
+   "success"
+ end
+end
+%>
+<div class="progress">
+  <div class="progress-bar progress-bar-<%=label_state%> progress-bar-striped" style="width: <%=progress_per%>%">
+    <%=progress_per.to_s%>%
+  </div>
+</div>
