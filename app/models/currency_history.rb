@@ -8,8 +8,6 @@ class CurrencyHistory < ApplicationRecord
     .or(TradeSetting.where(trade_type: :average_list_min))
     .maximum(:value)
 
-    ap average_min
-
     to = Time.now - average_min.minute
     self.where("created_at < ?", to.to_s).delete_all
   end
