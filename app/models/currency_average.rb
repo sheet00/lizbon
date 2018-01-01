@@ -32,7 +32,7 @@ class CurrencyAverage < ApplicationRecord
     ).order(:timestamp)
 
     #履歴なし、少ない場合は空応答
-    return [] if not history.present? or history.count < 100
+    return [] if not history.present? or history.count < 30
 
     price_list = history.pluck(:price)
 
@@ -52,8 +52,8 @@ class CurrencyAverage < ApplicationRecord
     end
 
 
-    #移動平均カウント
-    count = (price_list.count * 0.98).round
+    #移動平均カウント　n個分計算
+    count = (price_list.count - 19).round
 
     ave_list = []
     price_list.each_cons(count).each{|p|
