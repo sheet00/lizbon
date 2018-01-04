@@ -17,4 +17,9 @@ class ReportsController < ApplicationController
     @jobs = DelayedJob.all.order("run_at desc")
   end
 
+  def jobs_delete
+    DelayedJob.delete_all
+    redirect_to reports_jobs_path, notice: '削除しました。'
+  end
+
 end

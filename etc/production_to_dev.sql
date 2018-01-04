@@ -99,3 +99,13 @@ from
 
 
 
+--
+--
+truncate table lizbon_development.delayed_jobs; 
+
+insert 
+into lizbon_development.delayed_jobs 
+select
+  * 
+from
+  lizbon_production.delayed_jobs; 

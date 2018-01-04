@@ -1,7 +1,9 @@
 <%
 @page_title = "jobs"
 %>
+<p id="notice"><%= notice %></p>
 <h1><%=@page_title%></h1>
+<%= link_to 'キュー削除', reports_jobs_delete_path, {:method => :delete,:class => "btn btn-danger", data: {confirm: "delete?"}} %>
 <table class="table">
   <thead>
     <th>priority</th>

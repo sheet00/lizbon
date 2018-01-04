@@ -34,6 +34,7 @@ Rails.application.routes.draw do
   get 'reports/pl'
   get 'reports/average'
   get 'reports/jobs'
+  delete 'reports/jobs_delete'
 
   root to: 'home#index'
   # For details on the DSL available within this file, see http://guides.rubyonrails.org/routing.html
