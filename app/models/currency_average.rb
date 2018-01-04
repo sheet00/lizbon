@@ -18,8 +18,7 @@ class CurrencyAverage < ApplicationRecord
   end
 
 
-
-  #対象通貨の移動平均算出
+  # 対象通貨の移動平均算出
   def self.get_average_list(c_type)
     #マスタ値分、遡ってデータを移動平均を算出
     average_list_min = TradeSetting.where(trade_type: "average_list_min").first.value.to_i
@@ -64,4 +63,15 @@ class CurrencyAverage < ApplicationRecord
     return ave_list
   end
 
+
+  # 指定通貨の上昇率を取得する
+  # データなしの場合nil
+  def self.get_rate_of_up(c_pair)
+    averages = CurrencyAverage.where(currency_pair: c_pair).order(:id).pluck(:price)
+    if averages.present?
+      return (averages.last / averages.first).round(5)
+    else
+      return nil
+    end
+  end
 end

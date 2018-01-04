@@ -149,11 +149,14 @@ data = [['date','capital']]
                   </td>
                   <td><%= Time.at(active_order.timestamp.to_i) %></td>
                   <td><%= active_order.transaction_id %></td>
-                  <td><%= active_order.currency_pair %></td>
+                  <td>
+                    <%= active_order.currency_pair %><br>
+                    <small class="text-muted"><%=CurrencyAverage.get_rate_of_up(active_order.currency_pair)%>%</small>
+                  </td>
                   <td><%= t(active_order.action) %></td>
                   <td>
-                    <div><%= active_order.price.to_s(:delimited) %></div>
-                    <div><small class="text-muted"><%= get_recent_price(active_order.currency_pair).to_s(:delimited) %></small></div>
+                    <%= active_order.price.to_s(:delimited) %><br>
+                    <small class="text-muted"><%= get_recent_price(active_order.currency_pair).to_s(:delimited) %></small>
                   </td>
                   <td><%= active_order.amount.to_s(:delimited) %></td>
                   <td><%= active_order.contract_price.round.to_s(:delimited) %></td>
@@ -186,7 +189,8 @@ data = [['date','capital']]
                   <td>単価</td>
                   <td>
                     <%= o.price.to_s(:delimited) %><br>
-                    <small class="text-muted"><%= get_recent_price(o.currency_pair).to_s(:delimited) %></small>
+                    <small class="text-muted"><%= get_recent_price(o.currency_pair).to_s(:delimited) %></small><br>
+                    <small class="text-muted"><%=CurrencyAverage.get_rate_of_up(o.currency_pair)%>%</small>
                   </td>
                 </tr>
                 <tr>

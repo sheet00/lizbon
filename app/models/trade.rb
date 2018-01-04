@@ -168,8 +168,8 @@ class Trade
     # ×：×　買い注文を実行
     if not has_wallet and not has_order then
       #相場確認
-      ave_list = CurrencyAverage.where(currency_pair: pair).pluck(:price)
-      return "最新データ取得待ち" unless ave_list.any?
+      average_rate = CurrencyAverage.get_rate_of_up(pair)
+      return "最新データ取得待ち" unless average_rate.present?
 
 
       #テスト実行時は相場を見ない
@@ -178,17 +178,16 @@ class Trade
 
       #移動平均が指定上昇率以上になったら購入
       rate_of_up = TradeSetting.where(trade_type: :buy_rate_of_up).first.value
-      buy_criterion = ave_list.first * rate_of_up
 
       ApplicationController.helpers.log(
         "[trade_type][#{c_type}]",
         [
-          ["buy_criterion",buy_criterion.round(4)],
-          ["ave_list.last",ave_list.last.round(4)]
+          ["rate_of_up",rate_of_up],
+          ["average_rate",average_rate]
         ]
       )
 
-      if buy_criterion < ave_list.last
+      if rate_of_up < average_rate
         return "bid"
       else
         return "相場上昇待ち"
