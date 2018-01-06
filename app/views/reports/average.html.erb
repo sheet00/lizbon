@@ -16,21 +16,24 @@ to = CurrencyAverage.maximum(:timestamp)
   
   function drawChart() {
   
+    //key:c_type
+    //val:[row,row,row]
     <% @average.each do |k,v| %>
     <% next unless v.any? %>
   
     var source = [];
-    <% v.each_with_index do |val,i| %>
-    source.push([<%=i%>,<%=val%>]);
+    <% v.each_with_index do |row,i| %>
+    source.push(["<%=row.timestamp.strftime('%H:%M')%>",<%=row.price%>]);
     <% end %>
+  
+    console.log(source)
   
     // 'false' means that the first row contains labels, not data.
     var data = google.visualization.arrayToDataTable(source,true)
   
     var options = {
       hAxis: {
-        title: "<%=k%>",
-        slantedTextAngle: 90
+        title: "<%=k%>"
       },
       height: 600,
       legend: { position: 'none'}
@@ -42,8 +45,9 @@ to = CurrencyAverage.maximum(:timestamp)
   }
 </script>
 <% @average.each do |k,v| %>
-  <% next unless v.any? %>
-  <% label_name =  v.first < v.last ? "success" : "danger"%>
+  <% prices = v.map(&:price) %>
+  <% next unless prices.any? %>
+  <% label_name =  prices.first < prices.last ? "success" : "danger"%>
   <div class="panel panel-default">
     <div class="panel-heading"><span class="label label-<%=label_name%>"><%=k%></span></div>
     <div class="panel-body">
@@ -52,23 +56,23 @@ to = CurrencyAverage.maximum(:timestamp)
           <table class="table">
             <tr>
               <td>開始</td>
-              <td><%= v.first.round(4).to_s(:delimited) %></td>
+              <td><%= prices.first.round(4).to_s(:delimited) %></td>
             </tr>
             <tr>
               <td>終了</td>
-              <td><%= v.last.round(4).to_s(:delimited) %></td>
+              <td><%= prices.last.round(4).to_s(:delimited) %></td>
             </tr>
             <tr>
               <td>最小</td>
-              <td><%= v.min.round(4).to_s(:delimited) %></td>
+              <td><%= prices.min.round(4).to_s(:delimited) %></td>
             </tr>
             <tr>
               <td>開始～最小</td>
-              <td><%= (v.first / v.min).round(4).to_s(:delimited) %></td>
+              <td><%= (prices.first / prices.min).round(4).to_s(:delimited) %></td>
             </tr>
             <tr>
               <td>終了～最小</td>
-              <td><%= (v.last / v.min).round(4).to_s(:delimited) %></td>
+              <td><%= (prices.last / prices.min).round(4).to_s(:delimited) %></td>
             </tr>
             <% CurrencyAverage.buy?(k).each do |k,v| %>
               <tr>

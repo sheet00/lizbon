@@ -9,7 +9,7 @@ class ReportsController < ApplicationController
   def average
     @average = {}
     Target.all.each{|t|
-      @average[t.currency_type] = CurrencyAverage.where(currency_pair: "#{t.currency_type}_jpy").pluck(:price)
+      @average[t.currency_type] = CurrencyAverage.where(currency_pair: "#{t.currency_type}_jpy")
     }
   end
 
