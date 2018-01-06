@@ -21,8 +21,8 @@ class CurrencyAverage < ApplicationRecord
   # 対象通貨の移動平均算出
   def self.get_average_list(c_type)
     #マスタ値分、遡ってデータを移動平均を算出
-    average_list_min = TradeSetting.where(trade_type: "average_list_min").first.value.to_i
-    from_date = Time.now - average_list_min.minute
+    average_time = TradeSetting.where(trade_type: "average_list_hour").first.value.to_i
+    from_date = Time.now - average_time.hour
 
     history = CurrencyHistory.where(
       "currency_pair = ? and ? < timestamp",

@@ -399,7 +399,7 @@ class Trade
 
     #ロスカット下限価格設定
     #直近N時間の最低価格をセット
-    lower_datetime = Time.now - TradeSetting.where(trade_type: "sell_lower_min").first.value.minute
+    lower_datetime = Time.now - TradeSetting.where(trade_type: "sell_lower_hour").first.value.hour
     lower_price = CurrencyHistory
     .where("currency_pair = ? and ? < timestamp", "#{c_type}_jpy", lower_datetime.to_i)
     .minimum(:price)

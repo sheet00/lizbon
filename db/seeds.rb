@@ -24,6 +24,8 @@ TradeSetting.create(
   [
     {trade_type: :buy, value: 0.99},
     {trade_type: :sell_upper, value: 1.05},
-    {trade_type: :sell_lower, value: 0.9}
+    {trade_type: :sell_lower_hour, value: 72},
+    {trade_type: :average_list_hour, value: 72},
+    {trade_type: :buy_rate_of_up, value: 1.0003}
   ]
 )
