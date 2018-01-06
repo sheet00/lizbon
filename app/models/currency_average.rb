@@ -1,77 +1,60 @@
 class CurrencyAverage < ApplicationRecord
 
-  # currency_historyから移動平均を生成する
+  # currency_historyから平均を生成する
   def self.create_average
     ApplicationController.helpers.log("[create_average][start]")
     ActiveRecord::Base.transaction do
       CurrencyAverage.delete_all
 
-      Target.all.each{|t|
-        ave_list = get_average_list(t.currency_type)
-        ave_list.each{|r|
-          CurrencyAverage.create(currency_pair: "#{t.currency_type}_jpy", price: r.round(4))
-        }
+      CurrencyHistory.group_by_hour.each{|r|
+        CurrencyAverage.create(
+          currency_pair: r.currency_pair,
+          price: r.price,
+          timestamp: r.timestamp
+        )
       }
-
     end
     ApplicationController.helpers.log("[create_average][end]")
-  end
-
-
-  # 対象通貨の移動平均算出
-  def self.get_average_list(c_type)
-    #マスタ値分、遡ってデータを移動平均を算出
-    average_time = TradeSetting.where(trade_type: "average_list_hour").first.value.to_i
-    from_date = Time.now - average_time.hour
-
-    history = CurrencyHistory.where(
-      "currency_pair = ? and ? < timestamp",
-      "#{c_type}_jpy",
-      from_date.to_i
-    ).order(:timestamp)
-
-    #履歴なし、少ない場合は空応答
-    return [] if not history.present? or history.count < 30
-
-    price_list = history.pluck(:price)
-
-    #x万件以上ある場合、処理速度アップのため、N件単位で平均算出する
-    #n=2　2件に1つ採用 n=3 3件に1つ採用
-    #btcで1時間1万程度
-    n = 2
-    if 20000 < price_list.count
-      result = []
-      price_list.each_with_index{|val,i|
-        #余剰が0なら計算対象
-        result << val if i % n == 0
-      }
-
-      price_list = result
-      ApplicationController.helpers.log("[create_average][1/#{n}]")
-    end
-
-
-    #移動平均カウント　n個分計算
-    count = (price_list.count - 19).round
-
-    ave_list = []
-    price_list.each_cons(count).each{|p|
-      move_average = p.inject(:+) / count.to_f
-      ave_list << move_average
-    }
-
-    return ave_list
   end
 
 
   # 指定通貨の上昇率を取得する
   # データなしの場合nil
   def self.get_rate_of_up(c_pair)
-    averages = CurrencyAverage.where(currency_pair: c_pair).order(:id).pluck(:price)
+    averages = CurrencyAverage.where(currency_pair: c_pair).order(:timestamp).pluck(:price)
     if averages.present?
       return (averages.last / averages.first).round(5)
     else
       return nil
     end
+  end
+
+  # 指定通貨の購入判定結果
+  # 条件
+  # 1.開始<終了
+  # 2.最小<開始
+  # 3.終了=最大
+  # 4.最小と終了の比率がN%以上ある
+  def self.buy?(c_type)
+    averages = self.where(currency_pair: "#{c_type}_jpy").order(:timestamp).pluck(:price)
+
+    results = {}
+
+    #1
+    results["first < last"] = (averages.first < averages.last)
+
+    #2
+    results["min < first"] =  (averages.min < averages.first)
+
+    #3
+    results["last = max"] =  (averages.max == averages.last)
+
+    #4
+    rate = TradeSetting.where(trade_type: :buy_rate_of_up).first.value
+    last_diff = averages.last / averages.min
+    results["rate of up"] =  (rate < last_diff)
+
+
+    results
   end
 end

@@ -49,6 +49,7 @@ ActiveRecord::Schema.define(version: 20171228085624) do
   create_table "currency_averages", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.string "currency_pair", null: false
     t.decimal "price", precision: 14, scale: 4, null: false
+    t.datetime "timestamp", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["currency_pair"], name: "index_currency_averages_on_currency_pair"

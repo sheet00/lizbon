@@ -1,8 +1,8 @@
 <%
 @page_title = "コイン価格履歴-移動平均"
 rate_of_up = TradeSetting.where(trade_type: :buy_rate_of_up).first.value
-from = CurrencyHistory.minimum(:created_at)
-to = CurrencyHistory.maximum(:created_at)
+from = CurrencyAverage.minimum(:timestamp)
+to = CurrencyAverage.maximum(:timestamp)
 %>
 <p id="notice"><%= notice %></p>
 <h1><%=@page_title%></h1>
@@ -32,7 +32,7 @@ to = CurrencyHistory.maximum(:created_at)
         title: "<%=k%>",
         slantedTextAngle: 90
       },
-      height: 500,
+      height: 600,
       legend: { position: 'none'}
     };
   
@@ -49,15 +49,34 @@ to = CurrencyHistory.maximum(:created_at)
     <div class="panel-body">
       <div class="row">
         <div class="col-md-3">
-          <ul class="list-group">
-            <li class="list-group-item">
-              <%= v.first.round(4).to_s(:delimited) %>
-              ~
-              <%= v.last.round(4).to_s(:delimited) %>
-            </li>
-            <li class="list-group-item">上昇率:<%= (v.last / v.first).round(5) %></li>
-            <li class="list-group-item">購入実行:<%=(v.first * rate_of_up).round(4).to_s(:delimited)%></li>
-          </ul>
+          <table class="table">
+            <tr>
+              <td>開始</td>
+              <td><%= v.first.round(4).to_s(:delimited) %></td>
+            </tr>
+            <tr>
+              <td>終了</td>
+              <td><%= v.last.round(4).to_s(:delimited) %></td>
+            </tr>
+            <tr>
+              <td>最小</td>
+              <td><%= v.min.round(4).to_s(:delimited) %></td>
+            </tr>
+            <tr>
+              <td>開始～最小</td>
+              <td><%= (v.first / v.min).round(4).to_s(:delimited) %></td>
+            </tr>
+            <tr>
+              <td>終了～最小</td>
+              <td><%= (v.last / v.min).round(4).to_s(:delimited) %></td>
+            </tr>
+            <% CurrencyAverage.buy?(k).each do |k,v| %>
+              <tr>
+                <td><%=k%></td>
+                <td><%=v%></td>
+              </tr>
+            <% end %>
+          </table>
         </div>
         <div class="col-md-9">
           <div id="chart_div_<%=k%>"></div>

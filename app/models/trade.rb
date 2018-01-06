@@ -172,22 +172,11 @@ class Trade
       return "最新データ取得待ち" unless average_rate.present?
 
 
-      #テスト実行時は相場を見ない
-      return "bid" if @is_test
+      #価格遷移データから購入判定
+      do_buy = CurrencyAverage.buy?(c_type)
+      ApplicationController.helpers.log("[trade_type][#{c_type}]", do_buy)
 
-
-      #移動平均が指定上昇率以上になったら購入
-      rate_of_up = TradeSetting.where(trade_type: :buy_rate_of_up).first.value
-
-      ApplicationController.helpers.log(
-        "[trade_type][#{c_type}]",
-        [
-          ["rate_of_up",rate_of_up],
-          ["average_rate",average_rate]
-        ]
-      )
-
-      if rate_of_up < average_rate
+      if do_buy.values.all?{|v| v == true}
         return "bid"
       else
         return "相場上昇待ち"
@@ -252,7 +241,7 @@ class Trade
       else
         test_trade(transaction_id)
       end
-      ApplicationController.helpers.log("テスト実行","テスト実行")
+      ApplicationController.helpers.log("テスト実行")
     else
       #売買トレードはリトライしない
       #API上エラーで返っても、API上通ってる可能性があるため
