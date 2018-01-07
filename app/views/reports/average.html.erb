@@ -26,8 +26,6 @@ to = CurrencyAverage.maximum(:timestamp)
     source.push(["<%=row.timestamp.strftime('%H:%M')%>",<%=row.price%>]);
     <% end %>
   
-    console.log(source)
-  
     // 'false' means that the first row contains labels, not data.
     var data = google.visualization.arrayToDataTable(source,true)
   

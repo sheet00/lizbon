@@ -3,9 +3,10 @@ lizbon =
 			$ ->
 				#1min reload
 				timer = setInterval (->
-					#location.reload()
+					location.reload()
 					return
 				), 1000 * 60
 
-				$("#reload").click ->
+				reload = $("#reload").attr("data-reload")
+				if reload == true
 					clearInterval(timer)

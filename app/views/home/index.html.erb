@@ -19,38 +19,38 @@ data = [['date','capital']]
     </div>
     <div class="col-md-3">
       <h3>売買差益 <%=total_capital.round.to_s(:delimited)%>円</h3>
+    </div>
+    <div class="col-md-3">
       <h3>時価総額 <%=market_capital.round.to_s(:delimited)%>円</h3>
     </div>
-    <div class="col-md-6">
-      <div class="bs-callout bs-callout-info hidden-xs">
-        <div class="btn-group btn-group-sm">
-          <button class="btn btn-default">設定</button>
-          <% @t_settings.each do |s| %>
-            <a class="btn btn-default" href="<%= edit_trade_setting_path(s) %>">
-              <%= s.trade_type %>:<%= s.value.to_s %>
-            </a>
-          <% end %>
-        </div>
-        <div class="btn-group btn-group-sm">
-          <button class="btn btn-default">対象通貨</button>
-          <% @targets.each do |t| %>
-            <a class="btn btn-default" href="<%= targets_path %>">
-              <%= t.currency_type %>
-            </a>
-          <% end %>
-        </div>
-      </div>
+  </div>
+  <div class="hidden-xs margin_bottom">
+    <div class="btn-group btn-group-sm">
+      <button class="btn btn-default">設定</button>
+      <% @t_settings.each do |s| %>
+        <a class="btn btn-default" href="<%= edit_trade_setting_path(s) %>">
+          <%= s.trade_type %>:<%= s.value.to_s %>
+        </a>
+      <% end %>
     </div>
-    <!--mobile-->
-    <div class="col-md-6 visible-xs-inline-block">
-      <ul class="list-group">
-        <% @t_settings.each do |s| %>
-          <a class="list-group-item list-group-item-sm" href="<%= edit_trade_setting_path(s) %>">
-            <%= s.trade_type %>[<%= s.value.to_s %>]
-          </a>
-        <% end %>
-      </ul>
+    <div class="btn-group btn-group-sm">
+      <button class="btn btn-default">対象通貨</button>
+      <% @targets.each do |t| %>
+        <a class="btn btn-default" href="<%= targets_path %>">
+          <%= t.currency_type %>
+        </a>
+      <% end %>
     </div>
+  </div>
+  <!--mobile-->
+  <div class="visible-xs-inline-block">
+    <ul class="list-group">
+      <% @t_settings.each do |s| %>
+        <a class="list-group-item list-group-item-sm" href="<%= edit_trade_setting_path(s) %>">
+          <%= s.trade_type %>[<%= s.value.to_s %>]
+        </a>
+      <% end %>
+    </ul>
   </div>
   <nav class="navbar navbar-default">
     <div class="container-fluid">
