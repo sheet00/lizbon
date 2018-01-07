@@ -31,28 +31,22 @@ class CurrencyAverage < ApplicationRecord
 
   # 指定通貨の購入判定結果
   # 条件
-  # 1.開始<終了
-  # 2.最小<開始
-  # 3.終了=最大
-  # 4.最小と終了の比率がN%以上ある
+  # 1.最小と開始の比率がN%以上ある
+  # 2.最小と終了の比率がN%以上ある
   def self.buy?(c_type)
     averages = self.where(currency_pair: "#{c_type}_jpy").order(:timestamp).pluck(:price)
 
     results = {}
 
+
     #1
-    results["first < last"] = (averages.first < averages.last)
+    rate = TradeSetting.where(trade_type: :buy_rate_of_up).first.value
+    first_diff = averages.first / averages.min
+    results["first~min"] =  (rate < first_diff)
 
     #2
-    results["min < first"] =  (averages.min < averages.first)
-
-    #3
-    results["last = max"] =  (averages.max == averages.last)
-
-    #4
-    rate = TradeSetting.where(trade_type: :buy_rate_of_up).first.value
     last_diff = averages.last / averages.min
-    results["rate of up"] =  (rate < last_diff)
+    results["last~min"] =  (rate < last_diff)
 
 
     results
