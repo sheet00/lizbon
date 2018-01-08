@@ -33,6 +33,7 @@ class CurrencyAverage < ApplicationRecord
   # 条件
   # 1.最小と開始の比率がN%以上ある
   # 2.最小と終了の比率がN%以上ある
+  # 3.終了が1つ前より上昇している
   def self.buy?(c_type)
     averages = self.where(currency_pair: "#{c_type}_jpy").order(:timestamp).pluck(:price)
 
@@ -48,6 +49,13 @@ class CurrencyAverage < ApplicationRecord
     last_diff = averages.last / averages.min
     results["last~min"] =  (rate < last_diff)
 
+    #3
+    if 2 <= averages.count
+      recents = averages.last(2)
+      results["recent up"] = (recents.first < recents.last)
+    else
+      results["recent up"] = false
+    end
 
     results
   end
