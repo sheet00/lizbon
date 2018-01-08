@@ -22,19 +22,32 @@ to = CurrencyAverage.maximum(:timestamp)
     <% next unless v.any? %>
   
     var source = [];
+    var h_ticks = [];
+  
     <% v.each_with_index do |row,i| %>
-    source.push(["<%=row.timestamp.strftime('%H:%M')%>",<%=row.price%>]);
+    source.push([{v:<%=i%>,f:"<%=row.timestamp.strftime('%H:%M')%>"},<%=row.price%>]);
+  
+    //ticks
+    <% if i % 8 == 0 %>
+      h_ticks.push({v:<%=i%>,f:"<%=row.timestamp.strftime('%H:%M')%>"});
     <% end %>
+  
+    <% end %>
+  
   
     // 'false' means that the first row contains labels, not data.
     var data = google.visualization.arrayToDataTable(source,true)
   
     var options = {
       hAxis: {
-        title: "<%=k%>"
+        title: "<%=k%>",
+        //trendlineではラベル表示にticksが必要
+        //hAxis: { ticks: [{v:32, f:'thirty two'}, {v:64, f:'sixty four'}] }
+        ticks: h_ticks
       },
       height: 600,
-      legend: { position: 'none'}
+      legend: { position: 'none'},
+      trendlines: { 0: {} }
     };
   
     var chart = new google.visualization.LineChart(document.getElementById('chart_div_<%=k%>'));
@@ -42,6 +55,7 @@ to = CurrencyAverage.maximum(:timestamp)
     <% end %>
   }
 </script>
+<div id="patternformat_div"></div>
 <% @average.each do |k,v| %>
   <% prices = v.map(&:price) %>
   <% next unless prices.any? %>
