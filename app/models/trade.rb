@@ -167,6 +167,11 @@ class Trade
     # 財布：未約定
     # ×：×　買い注文を実行
     if not has_wallet and not has_order then
+      #前回売り確定からN時間経過
+      recent_ask_date = TradeHistory.recent_ask_date(pair)
+      return "再購入待ち" unless recent_ask_date + 6.hour < Time.now
+
+
       #相場確認
       average_rate = CurrencyAverage.get_rate_of_up(pair)
       return "最新データ取得待ち" unless average_rate.present?

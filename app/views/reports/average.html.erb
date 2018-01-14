@@ -55,7 +55,6 @@ to = CurrencyAverage.maximum(:timestamp)
     <% end %>
   }
 </script>
-<div id="patternformat_div"></div>
 <% @average.each do |k,v| %>
   <% prices = v.map(&:price) %>
   <% next unless prices.any? %>

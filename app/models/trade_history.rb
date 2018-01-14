@@ -24,4 +24,15 @@ class TradeHistory < ApplicationRecord
     .group(" DATE (from_unixtime(timestamp)), your_action")
   end
 
+
+  # 直近売却時間の取得
+  def self.recent_ask_date(c_pair)
+    recent_ask = self
+    .where(currency_pair: c_pair)
+    .where(your_action: :ask)
+    .maximum(:timestamp)
+
+    Time.at(recent_ask.to_i)
+  end
+
 end
